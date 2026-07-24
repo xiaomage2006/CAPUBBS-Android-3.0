@@ -2,13 +2,16 @@ package com.capubbs.lib;
 
 /**
  * Created by oc on 2016/10/13.
+ * Recomposed by MABoy on 2026/7/22.
  */
 public class Constants {
 
-    public static final String version = "2.0.2.2";
-    public static final String update_time = "2016-12-14";
+    public static final String version = "3.0";
+    public static final String update_time = "2026-07-24";
 
-    public static final String bbs_url = "https://www.chexie.net/api/client.php";
+    /** 站点根地址，所有 URL 拼接的唯一来源 */
+    public static final String base_url = "https://chexie.net";
+    public static final String bbs_url = base_url + "/api/client.php";
 
     public static final int REQUEST_BBS_GET_TOP = 1600;
     public static final int REQUEST_BBS_LOGIN = 1602;
@@ -18,6 +21,8 @@ public class Constants {
     public static final int REQUEST_BBS_SEARCH = 1610;
     public static final int REQUEST_BBS_LZL_SHOW = 1614;
     public static final int REQUEST_BBS_LZL_POST = 1615;
+    public static final int REQUEST_BBS_DELETE = 1616;
+    public static final int REQUEST_BBS_LZL_DELETE = 1617;
 
     public static final int MENU_SUBACTIVITY_OPEN_IN_BROWSER = 10303;
     public static final int MENU_SUBACTIVITY_SHARE = 10304;
@@ -45,9 +50,11 @@ public class Constants {
 
     public static final int CONTEXT_MENU_BBS_POST_LZL = 15203;
     public static final int CONTEXT_MENU_BBS_POST = 15204;
+    public static final int CONTEXT_MENU_BBS_DELETE = 15205;
     public static final int CONTEXT_MENU_BBS_EDIT = 15206;
     public static final int CONTEXT_MENU_BBS_URL = 15207;
-    // do not use 15208-15249 !!!
+    public static final int CONTEXT_MENU_LZL_DELETE = 15208;
+    // do not use 15209-15249 !!!
     public static final int CONTEXT_MENU_BBS_IMAGE = 15250;
     // do not use 15251-15299 !!!
     public static final int CONTEXT_MENU_BBS_PICTURE = 15260;
@@ -63,6 +70,11 @@ public class Constants {
     public static final int MESSAGE_BBS_CHECK_UPDATE = 21300;
 
     public static String updateVersion=Constants.version, updateMsg="", updateURL="";
+
+    /** GitHub 仓库地址和 Releases API */
+    public static final String github_repo = "ckcz123/CAPUBBS-Android-2.0";
+    public static final String github_release_api = "https://api.github.com/repos/" + github_repo + "/releases/latest";
+    public static final String github_release_page = "https://github.com/" + github_repo + "/releases";
 
 
 }

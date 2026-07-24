@@ -1,15 +1,12 @@
 package com.capubbs.lib.subactivity;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -17,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.capubbs.R;
 import com.capubbs.lib.BaseActivity;
@@ -48,7 +47,7 @@ public class SubActivity extends BaseActivity {
                 decodeString = (String) msg.obj;
                 if (!"".equals(decodeString)) {
                     SubActivity.this.closeContextMenu();
-                    CustomToast.showInfoToast(SubActivity.this, "³¤°´Í¼Æ¬¿ÉÒÔÊ¶±ğ¶şÎ¬Âë", 1200);
+                    CustomToast.showInfoToast(SubActivity.this, "å›¾ç‰‡ä¸­è¯†åˆ«åˆ°äºŒç»´ç ", 1200);
                 }
                 return true;
             }
@@ -71,9 +70,8 @@ public class SubActivity extends BaseActivity {
         type = bundle.getInt("type");
         url = bundle.getString("url", "");
 
-        // ÅĞ¶ÏÊÇ²»ÊÇgif¸ñÊ½Í¼Æ¬
         if (type == Constants.SUBACTIVITY_TYPE_PICTURE_FILE
-                && bundle.getString("title", "²é¿´Í¼Æ¬")
+                && bundle.getString("title", "æŸ¥çœ‹å›¾ç‰‡")
                 .toLowerCase(Locale.getDefault()).endsWith(".gif")) {
             type = Constants.SUBACTIVITY_TYPE_PICTURE_GIF;
         }
@@ -82,20 +80,20 @@ public class SubActivity extends BaseActivity {
             viewAbout();
         else if (type == Constants.SUBACTIVITY_TYPE_PICTURE_RESOURCE)
             picture = new Picture(this).showPicture(bundle.getInt("resid"),
-                    bundle.getString("title", "²é¿´Í¼Æ¬"));
+                    bundle.getString("title", "æŸ¥çœ‹å›¾ç‰‡"));
         else if (type == Constants.SUBACTIVITY_TYPE_PICTURE_FILE) {
             picture = new Picture(this).showPicture(bundle.getString("file"),
-                    bundle.getString("title", "²é¿´Í¼Æ¬"));
+                    bundle.getString("title", "æŸ¥çœ‹å›¾ç‰‡"));
         } else if (type == Constants.SUBACTIVITY_TYPE_PICTURE_URL) {
             picture = new Picture(this).showPicture(bundle.getString("url"));
         } else if (type == Constants.SUBACTIVITY_TYPE_PICTURE_GIF)
             gifView = new GifView(this).showGif(bundle.getString("file")
-                    , bundle.getString("title", "²é¿´Í¼Æ¬"));
+                    , bundle.getString("title", "æŸ¥çœ‹å›¾ç‰‡"));
         else if (type == Constants.SUBACTIVITY_TYPE_WEBVIEW)
             myWebView = new MyWebView(this)
                     .showWebView(bundle.getString("title", ""), url);
         else if (type == Constants.SUBACTIVITY_TYPE_WEBVIEW_HTML)
-            myWebView = new MyWebView(this).showWebHtml(bundle.getString("title", "²é¿´ÍøÒ³"),
+            myWebView = new MyWebView(this).showWebHtml(bundle.getString("title", "æŸ¥çœ‹ç½‘é¡µ"),
                     bundle.getString("html"));
         else {
             wantToExit();
@@ -132,7 +130,7 @@ public class SubActivity extends BaseActivity {
 
     public void viewAbout() {
         setContentView(R.layout.about);
-        setTitle("¹ØÓÚ±¾Èí¼ş");
+        setTitle("å…³äºæœ¬è½¯ä»¶");
         ViewSetting.setTextView(this, R.id.about_version, Constants.version);
         ViewSetting.setTextView(this, R.id.about_time, Constants.update_time);
     }
@@ -205,8 +203,8 @@ public class SubActivity extends BaseActivity {
 				String content = html;
 				if (content == null || "".equals(content))
 					content = getIntent().getStringExtra("content");
-				if (content == null) content = "ÏêÇéÇëµã»÷²é¿´";
-				Share.readyToShareURL(this, "·ÖÏíÍøÒ³", url, title, content, null);
+				if (content == null) content = "åœ¨CAPUBBSæŸ¥çœ‹";
+				Share.readyToShareURL(this, "åˆ†äº«ç½‘é¡µ", url, title, content, null);
 			} else if (type == Constants.SUBACTIVITY_TYPE_PICTURE_FILE) {
 				picture.sharePicture();
 			}
@@ -217,7 +215,7 @@ public class SubActivity extends BaseActivity {
             try {
                 picture.savePicture();
             } catch (Exception e) {
-                CustomToast.showErrorToast(this, "±£´æÊ§°Ü", 1500);
+                CustomToast.showErrorToast(this, "ä¿å­˜å¤±è´¥", 1500);
             }
             return true;
         }
@@ -226,7 +224,7 @@ public class SubActivity extends BaseActivity {
             try {
                 gifView.savePicture();
             } catch (Exception e) {
-                CustomToast.showErrorToast(this, "±£´æÊ§°Ü", 1500);
+                CustomToast.showErrorToast(this, "ä¿å­˜å¤±è´¥", 1500);
             }
             return true;
         }
@@ -243,12 +241,12 @@ public class SubActivity extends BaseActivity {
         if (type == Constants.SUBACTIVITY_TYPE_PICTURE_FILE) {
             if (picture == null) return;
             menu.add(Menu.NONE, Constants.CONTEXT_MENU_SUBACTIVITY_SHARE_PICTURE,
-                    Constants.CONTEXT_MENU_SUBACTIVITY_SHARE_PICTURE, "·ÖÏí");
+                    Constants.CONTEXT_MENU_SUBACTIVITY_SHARE_PICTURE, "åˆ†äº«");
             menu.add(Menu.NONE, Constants.CONTEXT_MENU_SUBACTIVITY_SAVE_PICTURE,
-                    Constants.CONTEXT_MENU_SUBACTIVITY_SAVE_PICTURE, "±£´æµ½ÊÖ»ú");
+                    Constants.CONTEXT_MENU_SUBACTIVITY_SAVE_PICTURE, "ä¿å­˜åˆ°æ‰‹æœº");
             if (!"".equals(decodeString)) {
                 menu.add(Menu.NONE, Constants.CONTEXT_MENU_SUBACTIVITY_DECODE_PICTURE,
-                        Constants.CONTEXT_MENU_SUBACTIVITY_DECODE_PICTURE, "Ê¶±ğ¶şÎ¬Âë");
+                        Constants.CONTEXT_MENU_SUBACTIVITY_DECODE_PICTURE, "è¯†åˆ«äºŒç»´ç ");
             }
         }
     }
@@ -261,7 +259,7 @@ public class SubActivity extends BaseActivity {
             try {
                 picture.savePicture();
             } catch (Exception e) {
-                CustomToast.showErrorToast(this, "±£´æÊ§°Ü", 1500);
+                CustomToast.showErrorToast(this, "ä¿å­˜å¤±è´¥", 1500);
             }
             return true;
         }

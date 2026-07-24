@@ -1,5 +1,7 @@
 package com.capubbs;
 
+import android.text.Spanned;
+
 import com.capubbs.lib.MyCalendar;
 
 public class ThreadInfo {
@@ -13,9 +15,11 @@ public class ThreadInfo {
     int threadid;
     boolean isTop, isExtr, isLock;
     int pid;
+    /** é¢„æ ¼å¼åŒ–çš„æ ‡é¢˜ Spanï¼Œé¿å…åœ¨ getView() ä¸­åå¤è°ƒç”¨ Html.fromHtml */
+    public CharSequence formattedTitle;
 
     /**
-     * Ê®´óÌû×ÓµÄ³õÊ¼»¯
+     *
      *
      * @param _rank
      * @param _board
@@ -40,12 +44,12 @@ public class ThreadInfo {
     }
 
     /**
-     * Ò»¸öÆÕÍ¨Ìû×ÓµÄ³õÊ¼»¯
+     *
      *
      * @param _board
      * @param _boardName
      * @param _author
-     * @param _time      Ê±¼ä´Á£¨ÒÔÃëÎªµ¥Î»£©
+     * @param _time
      * @param _title
      * @param _threadid
      */

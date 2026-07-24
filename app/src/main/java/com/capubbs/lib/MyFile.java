@@ -54,8 +54,8 @@ public class MyFile {
     }
 
     public static File getFile(Context context, String _dir, String _name) {
-        String dir = new String(_dir == null ? "" : _dir).trim(),
-                name = new String(_name == null ? "" : _name).trim();
+        String dir = (_dir == null ? "" : _dir).trim(),
+                name = (_name == null ? "" : _name).trim();
 
         File file = "".equals(dir) ? getFilesDir(context) : new File(getFilesDir(context), dir);
         if (file.exists() && file.isFile()) file.delete();
@@ -70,18 +70,18 @@ public class MyFile {
         if (!file.exists()) {
             file.createNewFile();
             if (defaultString != null) {
-                FileOutputStream fileOutputStream = new FileOutputStream(file);
-                fileOutputStream.write(Base64.encode(defaultString.getBytes(), Base64.DEFAULT));
-                fileOutputStream.close();
+                try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+                    fileOutputStream.write(Base64.encode(defaultString.getBytes(), Base64.DEFAULT));
+                }
                 return defaultString;
             }
         }
         if (file.length() == 0) return "";
-        FileInputStream fileInputStream = new FileInputStream(file);
-        byte[] bytes = new byte[(int) file.length()];
-        fileInputStream.read(bytes);
-        fileInputStream.close();
-        return new String(Base64.decode(bytes, Base64.DEFAULT));
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            byte[] bytes = new byte[(int) file.length()];
+            fileInputStream.read(bytes);
+            return new String(Base64.decode(bytes, Base64.DEFAULT));
+        }
     }
 
     public static void putString(
@@ -91,9 +91,9 @@ public class MyFile {
         if (!file.exists()) {
             file.createNewFile();
         }
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
-        fileOutputStream.write(Base64.encode(stringToWrite.getBytes(), Base64.DEFAULT));
-        fileOutputStream.close();
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            fileOutputStream.write(Base64.encode(stringToWrite.getBytes(), Base64.DEFAULT));
+        }
     }
 
     public static File getCache(Context context, String name) {
@@ -122,19 +122,23 @@ public class MyFile {
 
     public static boolean streamToFile(InputStream inputStream, File file) {
         File tmpFile = new File(file + "_tmp");
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(tmpFile);
-            byte[] bts = new byte[2048];
+        try (FileOutputStream fileOutputStream = new FileOutputStream(tmpFile)) {
+            byte[] bts = new byte[8192];
             int len;
             while ((len = inputStream.read(bts)) != -1)
                 fileOutputStream.write(bts, 0, len);
-            fileOutputStream.close();
+            fileOutputStream.flush();
             file.delete();
             return tmpFile.renameTo(file);
         } catch (Exception e) {
             tmpFile.delete();
             file.delete();
             return false;
+        } finally {
+            // 确保 InputStream 被关闭，防止 OkHttp 连接泄漏导致后续请求变慢/失败
+            if (inputStream != null) {
+                try { inputStream.close(); } catch (Exception ignored) {}
+            }
         }
     }
 
@@ -148,8 +152,16 @@ public class MyFile {
 
     public static boolean urlToFile(String url, File file, boolean override) {
         if (!override && file != null && file.exists()) return true;
+        // 首次尝试
+        if (downloadOnce(url, file)) return true;
+        // 重试一次（网络抖动常见，重试可显著提高成功率）
+        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        return downloadOnce(url, file);
+    }
+
+    private static boolean downloadOnce(String url, File file) {
         try {
-            return streamToFile(WebConnection.connect(url), file);
+            return streamToFile(WebConnection.connectForDownload(url), file);
         } catch (Exception e) {
             return false;
         }
@@ -207,15 +219,10 @@ public class MyFile {
     public static boolean copyFile(File source, File destination) {
         if (source == null || destination == null) return false;
         if (!source.exists()) return false;
-        try {
-            destination.delete();
-            destination.createNewFile();
-            FileInputStream inputStream = new FileInputStream(source);
-            FileOutputStream outputStream = new FileOutputStream(destination);
+        try (FileInputStream inputStream = new FileInputStream(source);
+             FileOutputStream outputStream = new FileOutputStream(destination)) {
             FileChannel fileChannel = inputStream.getChannel();
             fileChannel.transferTo(0, fileChannel.size(), outputStream.getChannel());
-            inputStream.close();
-            outputStream.close();
             return true;
         } catch (Exception e) {
             destination.delete();
@@ -223,5 +230,19 @@ public class MyFile {
         }
     }
 
+    public static String urlToString(String url) {
+        try (InputStream inputStream = WebConnection.connect(url)) {
+            if (inputStream == null) return null;
+            byte[] bytes = new byte[8192];
+            int len;
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            while ((len = inputStream.read(bytes)) != -1) {
+                baos.write(bytes, 0, len);
+            }
+            return new String(baos.toByteArray(), "UTF-8");
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 }

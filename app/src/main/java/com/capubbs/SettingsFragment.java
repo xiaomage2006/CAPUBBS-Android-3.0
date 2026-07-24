@@ -6,16 +6,19 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 import com.capubbs.lib.Constants;
 import com.capubbs.lib.Editor;
 import com.capubbs.lib.MyFile;
 import com.capubbs.lib.Share;
+import com.capubbs.lib.Util;
 import com.capubbs.lib.ViewSetting;
 import com.capubbs.lib.json.JSONArray;
 import com.capubbs.lib.json.JSONObject;
@@ -45,20 +48,20 @@ public class SettingsFragment extends Fragment {
         if (settingsView == null) return;
         try {
             if ("".equals(Userinfo.token)) {
-                ViewSetting.setTextView(settingsView, R.id.settings_username, "µã»÷µÇÂ¼...");
+                ViewSetting.setTextView(settingsView, R.id.settings_username, "ç‚¹å‡»ç™»å½•...");
                 ViewSetting.setOnClickListener(settingsView, R.id.settings_username, v -> Userinfo.showLoginView(bbsActivity));
             } else {
                 ViewSetting.setTextView(settingsView, R.id.settings_username, Userinfo.username);
                 ViewSetting.setOnClickListener(settingsView, R.id.settings_username, v ->
                         new AlertDialog.Builder(bbsActivity)
-                                .setTitle("È·ÈÏ×¢Ïú£¿").setMessage("ÄãÏëÒª×¢ÏúÂğ£¿")
-                                .setPositiveButton("È·ÈÏ", (dialog, which) -> {Userinfo.logout(bbsActivity);set(bbsActivity);})
-                                .setNegativeButton("È¡Ïû",null).show());
+                                .setTitle("ç¡®è®¤æ³¨é”€ç™»å½•").setMessage("ç¡®å®šè¦æ³¨é”€å—")
+                                .setPositiveButton("ç¡®å®š", (dialog, which) -> {Userinfo.logout(bbsActivity);set(bbsActivity);})
+                                .setNegativeButton("å–æ¶ˆ",null).show());
             }
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("SettingsFragment", "set error", e);
         }
     }
 
@@ -101,43 +104,51 @@ public class SettingsFragment extends Fragment {
             Intent intent=new Intent(context, SubActivity.class);
             intent.putExtra("type",Constants.SUBACTIVITY_TYPE_WEBVIEW_HTML);
             intent.putExtra("html",html);
-            intent.putExtra("title","»ñÈ¡Ô´´úÂë");
+            intent.putExtra("title","è·å–æºä»£ç ");
             context.startActivity(intent);
         });
         ViewSetting.setOnClickListener(settingsView, R.id.settings_share, v -> Share.readyToShareURL(context,
-                "ÍÆ¼ö¸øºÃÓÑ", Constants.updateURL, "»¶Ó­Ê¹ÓÃCAPUBBS Android "+Constants.updateVersion,
-                "ĞÂ°æAndroid CAPUBBS£¬»¶Ó­ÄúµÄÊ¹ÓÃ~", null));
-        if (!"".equals(Constants.updateVersion) && Constants.version.compareTo(Constants.updateVersion)<0) {
-            ViewSetting.setTextView(settingsView, R.id.settings_update, "¼ì²é¸üĞÂ       ");
+                "åˆ†äº«CAPUBBS", Constants.updateURL, "æ¬¢è¿ä½¿ç”¨CAPUBBS Android "+Constants.updateVersion,
+                "æ–°ç‰ˆAndroid CAPUBBSï¼Œæ¬¢è¿ä¸‹è½½ä½¿ç”¨~", null));
+        if (!"".equals(Constants.updateVersion) && Util.compareVersions(Constants.version, Constants.updateVersion) < 0) {
+            ViewSetting.setTextView(settingsView, R.id.settings_update, "æœ‰æ–°ç‰ˆæœ¬       ");
             BadgeView.show(context, settingsView.findViewById(R.id.settings_update), "new");
         }
 
         ViewSetting.setOnClickListener(settingsView, R.id.settings_update, v -> {
-            if ("".equals(Constants.updateVersion) || Constants.version.compareTo(Constants.updateVersion)>=0)
-                CustomToast.showInfoToast(context, "ÒÑÊÇ×îĞÂ°æ£¡");
+            if ("".equals(Constants.updateVersion) || Util.compareVersions(Constants.version, Constants.updateVersion) >= 0)
+                CustomToast.showInfoToast(context, "å·²æ˜¯æœ€æ–°ç‰ˆæœ¬ï¼");
             else {
-                new AlertDialog.Builder(context).setTitle("´æÔÚ°æ±¾"+Constants.updateVersion+"¸üĞÂ£¡")
-                        .setMessage(Constants.updateMsg).setPositiveButton("ÏÂÔØ", (dialog, which) -> {
-                    Uri uri=Uri.parse(Constants.updateURL);
+                new AlertDialog.Builder(context).setTitle("å‘ç°æ–°ç‰ˆæœ¬ " + Constants.updateVersion + "ï¼Œä¸‹è½½ï¼Ÿ")
+                        .setMessage(Constants.updateMsg).setPositiveButton("ä¸‹è½½", (dialog, which) -> {
+                    String url = Constants.updateURL;
+                    // é APK é“¾æ¥ï¼ˆå¦‚ GitHub Release é¡µé¢ï¼‰ç›´æ¥ç”¨æµè§ˆå™¨æ‰“å¼€
+                    if (url == null || url.isEmpty() || !url.toLowerCase().endsWith(".apk")) {
+                        context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                        return;
+                    }
+                    Uri uri = Uri.parse(url);
                     try {
-                        DownloadManager.Request request=new DownloadManager.Request(uri);
-                        request.setTitle("ÕıÔÚÏÂÔØCAPUBBS...");
-                        File file=MyFile.getFile(context,null,"CAPUBBS.apk");
+                        DownloadManager.Request request = new DownloadManager.Request(uri);
+                        request.setTitle("æ­£åœ¨ä¸‹è½½CAPUBBS...");
+                        File file = MyFile.getFile(context, null, "CAPUBBS.apk");
                         if (file.exists()) file.delete();
                         request.setDestinationUri(Uri.fromFile(file));
-                        request.setDescription("ÎÄ¼ş±£´æÔÚ"+file.getAbsolutePath());
+                        request.setDescription("æ–‡ä»¶ä¿å­˜åœ¨" + file.getAbsolutePath());
                         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                         request.setMimeType("application/vnd.android.package-archive");
-                        request.allowScanningByMediaScanner();
-                        DownloadManager downloadManager=(DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+                            request.allowScanningByMediaScanner();
+                        }
+                        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
                         downloadManager.enqueue(request);
-                        CustomToast.showInfoToast(context,"ÎÄ¼şÏÂÔØÖĞ£¬ÇëÔÚÍ¨ÖªÀ¸²é¿´ÏÂÔØ½ø¶È");
+                        CustomToast.showInfoToast(context, "æ–‡ä»¶ä¸‹è½½ä¸­ï¼Œç¨åé€šçŸ¥æ æŸ¥çœ‹ä¸‹è½½ç»“æœ");
                     }
                     catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e("SettingsFragment", "download error", e);
                         context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
                     }
-                }).setNegativeButton("È¡Ïû",null).show();
+                }).setNegativeButton("å–æ¶ˆ", null).show();
             }
         });
     }
@@ -145,41 +156,104 @@ public class SettingsFragment extends Fragment {
     public static void clearcache(Context context) {
         try {
             File file = MyFile.getCache(context, null);
-            String msg = "»º´æÂ·¾¶£º\n" + file.getAbsolutePath() + "/\n\nÎÄ¼şÊıÄ¿£º" + MyFile.getFileCount(file) + "\n»º´æ´óĞ¡£º" + MyFile.getFileSizeString(file);
-            new AlertDialog.Builder(context).setTitle("Çå³ı»º´æ").setMessage(msg)
-                    .setPositiveButton("Çå³ı", (dialog, which) -> {
+            String msg = "æ¸…ç†ç›®å½•\n" + file.getAbsolutePath() + "/\n\næ–‡ä»¶æ•°ç›®" + MyFile.getFileCount(file) + "\næ–‡ä»¶å¤§å°" + MyFile.getFileSizeString(file);
+            new AlertDialog.Builder(context).setTitle("æ¸…é™¤ç¼“å­˜").setMessage(msg)
+                    .setPositiveButton("ç¡®å®š", (dialog, which) -> {
                         MyFile.clearCache(context);
-                        CustomToast.showSuccessToast(context, "Çå³ı³É¹¦£¡");
-                    }).setNegativeButton("È¡Ïû", null).show();
+                        CustomToast.showSuccessToast(context, "æ¸…ç†æˆåŠŸï¼");
+                    }).setNegativeButton("å–æ¶ˆ", null).show();
         }
-        catch (Exception e) {e.printStackTrace();}
+        catch (Exception e) {Log.e("SettingsFragment", "clearcache error", e);}
     }
 
     public static void checkUpdate(BBSActivity bbsActivity) {
         new Thread(() -> {
-            Parameters parameters= WebConnection.connect(Constants.bbs_url+"?ask=main",new ArrayList<>());
-            if ("200".equals(parameters.name)) {
-                bbsActivity.handler.sendMessage(Message.obtain(bbsActivity.handler,Constants.MESSAGE_BBS_CHECK_UPDATE,parameters.value));
+            // 1. å…ˆæŸ¥ BBS API
+            Parameters parameters = WebConnection.connect(Constants.bbs_url + "?ask=main", new ArrayList<>());
+            if ("200".equals(parameters.name) && parameters.value != null && !parameters.value.isEmpty()) {
+                bbsActivity.handler.sendMessage(Message.obtain(bbsActivity.handler, Constants.MESSAGE_BBS_CHECK_UPDATE, parameters.value));
+                // å¦‚æœ BBS API è¿”å›äº†æ›´æ–°ä¿¡æ¯ï¼Œä¸å†æŸ¥ GitHub
+                if (hasUpdateInfo(parameters.value)) return;
             }
+            // 2. BBS API æ— æ›´æ–°ä¿¡æ¯ï¼ŒæŸ¥ GitHub Releases
+            checkGithubReleases(bbsActivity);
         }).start();
+    }
+
+    /** æ£€æŸ¥ BBS API å“åº”ä¸­æ˜¯å¦åŒ…å«æ›´æ–°ä¿¡æ¯ */
+    private static boolean hasUpdateInfo(String response) {
+        try {
+            JSONArray arr = new JSONArray(response);
+            if (arr.length() == 0) return false;
+            JSONObject obj = arr.getJSONObject(0);
+            String ver = obj.optString("updatetime");
+            return ver != null && !ver.isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** ä» GitHub Releases API æ£€æŸ¥æœ€æ–°ç‰ˆæœ¬ */
+    private static void checkGithubReleases(BBSActivity bbsActivity) {
+        try {
+            Parameters result = WebConnection.connect(Constants.github_release_api, new ArrayList<>());
+            if ("200".equals(result.name) && result.value != null) {
+                JSONObject release = new JSONObject(result.value);
+                String tagName = release.optString("tag_name");
+                String releaseUrl = release.optString("html_url");
+                String releaseNotes = release.optString("body");
+                String apkUrl = "";
+
+                // ä» assets ä¸­æ‰¾ APK ä¸‹è½½é“¾æ¥
+                JSONArray assets = release.optJSONArray("assets");
+                if (assets != null) {
+                    for (int i = 0; i < assets.length(); i++) {
+                        JSONObject asset = assets.getJSONObject(i);
+                        String name = asset.optString("name", "");
+                        if (name.endsWith(".apk")) {
+                            apkUrl = asset.optString("browser_download_url");
+                            break;
+                        }
+                    }
+                }
+
+                // å¦‚æœæ²¡æœ‰ APK èµ„æºï¼Œä½¿ç”¨ Release é¡µé¢ URL
+                if (apkUrl.isEmpty()) apkUrl = releaseUrl;
+
+                Constants.updateVersion = tagName;
+                Constants.updateURL = apkUrl;
+                Constants.updateMsg = releaseNotes != null && !releaseNotes.isEmpty()
+                        ? releaseNotes : "å‘ç°æ–°ç‰ˆæœ¬ï¼Œç‚¹å‡»ä¸‹è½½æ›´æ–°";
+
+                bbsActivity.handler.sendMessage(Message.obtain(
+                        bbsActivity.handler, Constants.MESSAGE_BBS_CHECK_UPDATE, "github"));
+            }
+        } catch (Exception e) {
+            Log.e("SettingsFragment", "github release check error", e);
+        }
     }
 
     public static void update(BBSActivity bbsActivity, String string) {
         try {
-            JSONObject jsonObject=new JSONArray(string).getJSONObject(0);
-            Constants.updateVersion=jsonObject.optString("updatetime");
-            Constants.updateURL=jsonObject.optString("updateurl");
-            Constants.updateMsg=jsonObject.optString("updatetext");
+            // "github" æ ‡è®°è¡¨ç¤ºæ•°æ®å·²ç”± checkGithubReleases ç›´æ¥è®¾ç½®
+            if (!"github".equals(string)) {
+                // BBS API å“åº”ï¼šJSON æ•°ç»„æ ¼å¼
+                JSONObject jsonObject = new JSONArray(string).getJSONObject(0);
+                Constants.updateVersion = jsonObject.optString("updatetime");
+                Constants.updateURL = jsonObject.optString("updateurl");
+                Constants.updateMsg = jsonObject.optString("updatetext");
+            }
 
-            if (!"".equals(Constants.updateVersion) && Constants.version.compareTo(Constants.updateVersion)<0) {
+            if (!"".equals(Constants.updateVersion)
+                    && Util.compareVersions(Constants.version, Constants.updateVersion) < 0) {
                 BadgeView.show(bbsActivity, bbsActivity.findViewById(R.id.bbs_bottom_img_settings), "new");
-                if (settingsView!=null) {
-                    ViewSetting.setTextView(settingsView, R.id.settings_update, "¼ì²é¸üĞÂ       ");
+                if (settingsView != null) {
+                    ViewSetting.setTextView(settingsView, R.id.settings_update, "æœ‰æ–°ç‰ˆæœ¬       ");
                     BadgeView.show(bbsActivity, settingsView.findViewById(R.id.settings_update), "new");
                 }
             }
         }
-        catch (Exception e) {e.printStackTrace();}
+        catch (Exception e) {Log.e("SettingsFragment", "update error", e);}
     }
 
 }

@@ -1,42 +1,79 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
+
+// 签名密钥配置 —— 从 gradle.properties 读取，避免敏感信息硬编码
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    namespace 'com.capubbs'
+    compileSdk 33
+
     defaultConfig {
         applicationId "com.capubbs"
-        minSdkVersion 15
-        targetSdkVersion 24
-        versionCode 11
-        versionName "2.0.2.1"
-
-        jackOptions {
-            enabled true
-        }
-
+        minSdk 21
+        targetSdk 33
+        versionCode 12
+        versionName "3.0"
     }
+
     signingConfigs {
         debug {
             storeFile file("debug.keystore")
         }
+        if (keystorePropertiesFile.exists()) {
+            release {
+                storeFile rootProject.file(keystoreProperties['storeFile'] ?: "my-release-key")
+                storePassword keystoreProperties['storePassword'] ?: ""
+                keyAlias keystoreProperties['keyAlias'] ?: ""
+                keyPassword keystoreProperties['keyPassword'] ?: ""
+            }
+        }
     }
 
-    aaptOptions {
-        cruncherEnabled = false
+    buildTypes {
+        release {
+            // R8 代码混淆 + 资源压缩
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // 使用 release 签名（如果 keystore.properties 存在）
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+            // 禁止 debug (release 默认即为 false，显式声明更安全)
+            debuggable false
+            jniDebuggable false
+            renderscriptDebuggable false
+        }
+        debug {
+            minifyEnabled false
+            debuggable true
+        }
+    }
+
+    // Lint 检查：发布前阻止致命错误
+    lint {
+        checkReleaseBuilds true
+        abortOnError false
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        encoding "GBK"
+        encoding "UTF-8"
     }
-
-    useLibrary 'org.apache.http.legacy'
-
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.2.1'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.viewpager:viewpager:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }

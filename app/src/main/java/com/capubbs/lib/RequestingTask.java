@@ -9,6 +9,7 @@ import com.capubbs.lib.webconnection.WebConnection;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("deprecation")
 public class RequestingTask extends AsyncTask<ArrayList<Parameters>, String, Parameters> {
     ProgressDialog progressDialog;
     String requestString;
@@ -16,20 +17,20 @@ public class RequestingTask extends AsyncTask<ArrayList<Parameters>, String, Par
     BaseActivity baseActivity;
 
     /**
-     * ·¢ÆğÒ»¸öhttpµ÷ÓÃ£»Èç¹û·ÃÎÊÊ§°ÜÄÇÃ´Ö±½ÓToastÌáĞÑ£¬ÎŞ·µ»Ø
      *
-     * @param msg  ÌáÊ¾ÏûÏ¢
-     * @param url  ÇëÇóµØÖ·
-     * @param type ·ÃÎÊÀàĞÍ
+     *
+     * @param msg  æ˜¾ç¤ºæ¶ˆæ¯
+     * @param url  è¯·æ±‚åœ°å€
+     * @param type è¯·æ±‚ç±»å‹
      */
     public RequestingTask(BaseActivity activity, String msg, String url, int type) {
         baseActivity = activity;
         progressDialog = new ProgressDialog(activity);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setTitle("ÌáÊ¾");
+        progressDialog.setTitle("æç¤º");
         progressDialog.setMessage(msg);
         progressDialog.setIndeterminate(false);
-        progressDialog.setCancelable(false);
+        progressDialog.setCancelable(true);
         requestString = url;
         requestType = type;
     }
@@ -49,9 +50,9 @@ public class RequestingTask extends AsyncTask<ArrayList<Parameters>, String, Par
         progressDialog.dismiss();
         if (!"200".equals(parameters.name)) {
             if ("-1".equals(parameters.name)) {
-                CustomToast.showInfoToast(baseActivity, "ÎŞ·¨Á¬½ÓÍøÂç(-1,-1)");
+                CustomToast.showInfoToast(baseActivity, "æ— æ³•è¿æ¥æœåŠ¡å™¨(-1,-1)");
             } else
-                CustomToast.showInfoToast(baseActivity, "ÎŞ·¨Á¬½Óµ½·şÎñÆ÷ (HTTP " + parameters.name + ")");
+                CustomToast.showInfoToast(baseActivity, "æ— æ³•è¿æ¥åˆ°æœåŠ¡å™¨ (HTTP " + parameters.name + ")");
         } else baseActivity.finishRequest(requestType, parameters.value);
     }
 

@@ -2,7 +2,6 @@ package com.capubbs.lib;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
@@ -17,24 +16,19 @@ import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 public class Share {
-    private static final String[] sharesTo = {"·¢ËÍ¸øÎ¢ÐÅºÃÓÑ", "·ÖÏíµ½ÅóÓÑÈ¦"};
+    private static final String[] sharesTo = {"å‘é€ç»™å¾®ä¿¡å¥½å‹", "åˆ†äº«åˆ°æœ‹å‹åœˆ"};
     private static final String WX_APP_ID = "wxb064bb9685c7b1a0";
-
 
     private static IWXAPI api;
 
     public static void readyToShareURL(final Context context, final String dialogTitle,
                                        final String url, final String title, final String content, final Bitmap bitmap) {
         new AlertDialog.Builder(context).setTitle(dialogTitle)
-                .setItems(sharesTo, new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0)
-                            urlToWx(context, url, title, content, bitmap, false);
-                        else if (which == 1)
-                            urlToWx(context, url, title, content, bitmap, true);
-                    }
+                .setItems(sharesTo, (dialog, which) -> {
+                    if (which == 0)
+                        urlToWx(context, url, title, content, bitmap, false);
+                    else if (which == 1)
+                        urlToWx(context, url, title, content, bitmap, true);
                 }).setCancelable(true).show();
     }
 
@@ -42,30 +36,22 @@ public class Share {
                                          final Bitmap bitmap) {
         if (bitmap == null) return;
         new AlertDialog.Builder(context).setTitle(dialogTitle)
-                .setItems(sharesTo, new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0)
-                            imgToWx(context, bitmap, false);
-                        else if (which == 1)
-                            imgToWx(context, bitmap, true);
-                    }
+                .setItems(sharesTo, (dialog, which) -> {
+                    if (which == 0)
+                        imgToWx(context, bitmap, false);
+                    else if (which == 1)
+                        imgToWx(context, bitmap, true);
                 }).setCancelable(true).show();
     }
 
     public static void readyToShareText(final Context context, final String dialogTitle,
                                         final String text) {
         new AlertDialog.Builder(context).setTitle(dialogTitle)
-                .setItems(sharesTo, new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0)
-                            textToWx(context, text, false);
-                        else if (which == 1)
-                            textToWx(context, text, true);
-                    }
+                .setItems(sharesTo, (dialog, which) -> {
+                    if (which == 0)
+                        textToWx(context, text, false);
+                    else if (which == 1)
+                        textToWx(context, text, true);
                 }).setCancelable(true).show();
     }
 
@@ -76,14 +62,17 @@ public class Share {
         webpage.webpageUrl = url;
         WXMediaMessage msg = new WXMediaMessage(webpage);
         msg.title = title;
-        String _con = new String(content);
+        String _con = content;
         if (_con.length() >= 40) _con = _con.substring(0, 38) + "...";
         msg.description = _con;
-        if (bitmap == null)
-            bitmap = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.logo_share)).getBitmap();
+
+        if (bitmap == null) {
+            bitmap = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.logo_share, context.getTheme())).getBitmap();
+        }
+
         byte[] bts = MyBitmapFactory.bitmapToArray(bitmap, 31);
         if (bts.length >= 31 * 1024) {
-            bitmap = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.logo_share)).getBitmap();
+            bitmap = ((BitmapDrawable) context.getResources().getDrawable(R.drawable.logo_share, context.getTheme())).getBitmap();
             bts = MyBitmapFactory.bitmapToArray(bitmap, 31);
         }
         msg.thumbData = bts;
@@ -131,7 +120,6 @@ public class Share {
             api = WXAPIFactory.createWXAPI(context, WX_APP_ID, false);
             api.registerApp(WX_APP_ID);
         }
-
         return api;
     }
 }

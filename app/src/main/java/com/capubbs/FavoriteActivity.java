@@ -3,16 +3,13 @@ package com.capubbs;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
@@ -20,6 +17,7 @@ import com.capubbs.lib.BaseActivity;
 import com.capubbs.lib.Constants;
 import com.capubbs.lib.Editor;
 import com.capubbs.lib.MyCalendar;
+import com.capubbs.lib.Util;
 import com.capubbs.lib.ViewSetting;
 import com.capubbs.lib.view.CustomToast;
 
@@ -28,7 +26,6 @@ import com.capubbs.lib.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
 public class FavoriteActivity extends BaseActivity {
 
@@ -38,7 +35,7 @@ public class FavoriteActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle(" ’≤ÿµƒ÷˜Ã‚Ã˚");
+        setTitle("ÊàëÁöÑÊî∂Ëóè");
         load(this);
         setContentView(R.layout.bbs_thread_listview);
         listView=(ListView)findViewById(R.id.bbs_thread_listview);
@@ -67,48 +64,39 @@ public class FavoriteActivity extends BaseActivity {
                         R.layout.bbs_thread_item, parent, false);
                 String title = "<font color='#006060'>" + threadInfo.title + "</font>";
                 ViewSetting.setTextView(convertView, R.id.bbs_thread_item_title,
-                        Html.fromHtml(title));
+                        Util.fromHtml(title));
                 ViewSetting.setTextView(convertView, R.id.bbs_thread_item_author,
                         threadInfo.author + " / " + Board.getNameById(threadInfo.board));
                 ViewSetting.setTextViewColor(convertView, R.id.bbs_thread_item_author,
                         Color.parseColor("#333333"));
                 ViewSetting.setTextView(convertView, R.id.bbs_thread_item_time,
-                        " ’≤ÿ”⁄ " + MyCalendar.format(threadInfo.timestamp, "yyyy-MM-dd"));
+                        "Êî∂Ëóè‰∫é " + MyCalendar.format(threadInfo.timestamp, "yyyy-MM-dd"));
                 ViewSetting.setTextViewColor(convertView, R.id.bbs_thread_item_time,
                         Color.parseColor("#333333"));
                 return convertView;
             }
         });
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SearchInfo threadInfo = arrayList.get(position);
-                Intent intent = new Intent(FavoriteActivity.this, ViewActivity.class);
-                intent.putExtra("bid", threadInfo.board);
-                intent.putExtra("tid", threadInfo.threadid + "");
-                intent.putExtra("type", "thread");
-                startActivity(intent);
-            }
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            SearchInfo threadInfo = arrayList.get(position);
+            Intent intent = new Intent(FavoriteActivity.this, ViewActivity.class);
+            intent.putExtra("bid", threadInfo.board);
+            intent.putExtra("tid", threadInfo.threadid + "");
+            intent.putExtra("type", "thread");
+            startActivity(intent);
         });
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                final SearchInfo threadInfo = arrayList.get(position);
-                String[] strings = new String[]{"…æ≥˝œÓƒø"};
-                new AlertDialog.Builder(FavoriteActivity.this)
-                        .setItems(strings, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                delFavorite(FavoriteActivity.this,
-                                        threadInfo.board, threadInfo.threadid);
-                                ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
-                            }
-                        }).show();
-                return true;
-            }
+        listView.setOnItemLongClickListener((parent, view, position, id) -> {
+            final SearchInfo threadInfo = arrayList.get(position);
+            String[] strings = new String[]{"Âà†Èô§Ê≠§Êù°"};
+            new AlertDialog.Builder(FavoriteActivity.this)
+                    .setItems(strings, (dialog, which) -> {
+                        delFavorite(FavoriteActivity.this,
+                                threadInfo.board, threadInfo.threadid);
+                        ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
+                    }).show();
+            return true;
         });
         if (arrayList.size()==0) {
-            CustomToast.showInfoToast(this, "ƒ„ªπ√ª”– ’≤ÿµƒÃ˚◊”£°");
+            CustomToast.showInfoToast(this, "‰Ω†ËøòÊ≤°ÊúâÊî∂ËóèÁöÑÂ∏ñÂ≠êÂì¶");
         }
     }
 
@@ -149,12 +137,7 @@ public class FavoriteActivity extends BaseActivity {
     private static void save(Context context) {
         if (arrayList==null) return;
         try {
-            Collections.sort(arrayList, new Comparator<SearchInfo>() {
-                @Override
-                public int compare(SearchInfo lhs, SearchInfo rhs) {
-                    return (int)(rhs.timestamp-lhs.timestamp);
-                }
-            });
+            Collections.sort(arrayList, (lhs, rhs) -> (int)(rhs.timestamp-lhs.timestamp));
             JSONArray jsonArray=new JSONArray();
             int len=arrayList.size();
             for (int i=0;i<len;i++) {
@@ -169,7 +152,7 @@ public class FavoriteActivity extends BaseActivity {
             }
             Editor.putString(context, "bbs_favorite_posts", jsonArray.toString());
         }
-        catch (Exception e) {CustomToast.showErrorToast(context, "±£¥Ê ß∞‹");}
+        catch (Exception e) {CustomToast.showErrorToast(context, "‰øùÂ≠òÂ§±Ë¥•");}
     }
 
     public static boolean addFavorite(Context context,
@@ -178,7 +161,7 @@ public class FavoriteActivity extends BaseActivity {
         if (arrayList==null) load(context);
         for (SearchInfo info: arrayList.toArray(new SearchInfo[arrayList.size()])) {
             if (info.threadid==threadid && info.board.equals(board)) {
-                CustomToast.showInfoToast(context, "¥À÷˜Ã‚“— ’≤ÿ£°");
+                CustomToast.showInfoToast(context, "Â∑≤Êî∂ËóèËøáÊ≠§Â∏ñÂ≠ê");
                 return false;
             }
         }

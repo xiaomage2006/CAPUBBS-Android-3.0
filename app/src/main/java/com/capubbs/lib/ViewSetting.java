@@ -128,7 +128,7 @@ public class ViewSetting {
             if (editText == null) return;
             String str;
             if (string == null) str = "";
-            else str = new String(string);
+            else str = string;
             editText.setText(str);
             editText.setSelection(str.length());
         } catch (Exception e) {
@@ -253,7 +253,6 @@ public class ViewSetting {
     }
 
 
-    @SuppressWarnings("deprecation")
     public static void setBackground(Context context, View view, Bitmap bitmap,
                                      int width, int height) {
         if (height == 0 || width == 0 || view == null || bitmap == null) return;
@@ -275,7 +274,7 @@ public class ViewSetting {
                 y = (height - dstheight) / 2;
             }
             Bitmap ans = Bitmap.createBitmap(bitmap, x, y, dstwidth, dstheight);
-            view.setBackgroundDrawable(
+            view.setBackground(
                     new BitmapDrawable(context.getResources(), ans));
         } catch (Exception e) {
         } catch (OutOfMemoryError e) {
@@ -307,7 +306,7 @@ public class ViewSetting {
     public static void setBackground(Context context, View view, int resid) {
         try {
             if (view == null || resid == 0) return;
-            Drawable drawable = context.getResources().getDrawable(resid);
+            Drawable drawable = context.getResources().getDrawable(resid, context.getTheme());
             if (drawable == null) return;
             setBackground(context, view, drawable);
         } catch (Exception e) {
@@ -320,7 +319,7 @@ public class ViewSetting {
                                      int width, int height) {
         try {
             if (view == null || resid == 0) return;
-            Drawable drawable = context.getResources().getDrawable(resid);
+            Drawable drawable = context.getResources().getDrawable(resid, context.getTheme());
             if (drawable == null) return;
             setBackground(context, view, drawable, width, height);
         } catch (Exception e) {

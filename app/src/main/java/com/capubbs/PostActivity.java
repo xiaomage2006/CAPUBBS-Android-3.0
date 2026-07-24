@@ -28,11 +28,10 @@ public class PostActivity extends BaseActivity {
     String text = "";
 
     @Override
-    @SuppressWarnings("unchecked")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if ("".equals(Userinfo.token)) {
-            CustomToast.showInfoToast(this, "ÇëÏÈµÇÂ¼£¡");
+            CustomToast.showInfoToast(this, "è¯·å…ˆç™»å½•");
             super.wantToExit();
             return;
         }
@@ -50,17 +49,17 @@ public class PostActivity extends BaseActivity {
 
         setContentView(R.layout.bbs_postpage);
 
-        String tt = "·¢±íÌû×Ó";
-        if ("reply".equals(type)) tt = "»Ø¸´Ìû×Ó";
-        if ("edit".equals(type)) tt = "±à¼­Ìû×Ó";
+        String tt = "å‘è¡¨æ–°å¸–";
+        if ("reply".equals(type)) tt = "å›å¤å¸–å­";
+        if ("edit".equals(type)) tt = "ç¼–è¾‘å¸–å­";
         setTitle(tt);
         if (!"".equals(title)) {
             ViewSetting.setEditTextValue(this, R.id.bbs_postpage_title, "Re: " + title);
         }
         Button button = (Button) findViewById(R.id.bbs_postpage_button);
-        String hint = "·¢±í";
-        if ("reply".equals(type)) hint = "»Ø¸´";
-        if ("edit".equals(type)) hint = "±à¼­";
+        String hint = "å‘é€";
+        if ("reply".equals(type)) hint = "å‘é€å›å¤";
+        if ("edit".equals(type)) hint = "ç¡®è®¤ç¼–è¾‘";
         button.setText(hint);
         button.setOnClickListener(v -> post());
         if ("reply".equals(type)) {
@@ -81,7 +80,6 @@ public class PostActivity extends BaseActivity {
             finishPost(string);
     }
 
-    @SuppressWarnings("unchecked")
     void post() {
 
         if ("edit".equals(type)) {
@@ -92,11 +90,11 @@ public class PostActivity extends BaseActivity {
         String title = ViewSetting.getEditTextValue(this, R.id.bbs_postpage_title).trim();
         String text = ViewSetting.getEditTextValue(this, R.id.bbs_postpage_text);
         if ("".equals(title)) {
-            CustomToast.showErrorToast(this, "±êÌâ²»ÄÜÎª¿Õ£¡", 1500);
+            CustomToast.showErrorToast(this, "æ ‡é¢˜ä¸èƒ½ä¸ºç©º", 1500);
             return;
         }
-        //if (!text.contains("·¢×Ô CAPUBBS"))
-        //    text += "\n\n--\n·¢×Ô CAPUBBS (Android " + Constants.version + ")\n";
+        //if (!text.contains("æ¥è‡ª CAPUBBS"))
+        //    text += "\n\n--\næ¥è‡ª CAPUBBS (Android " + Constants.version + ")\n";
         //CheckBox checkBox = (CheckBox) findViewById(R.id.bbs_postpage_anonymous);
         //String anonymous = checkBox.isChecked() ? "1" : "0";
 
@@ -116,21 +114,20 @@ public class PostActivity extends BaseActivity {
         if ("reply".equals(type)) {
             arrayList.add(new Parameters("tid", threadid));
         }
-        new RequestingTask(this, "ÕıÔÚ·¢±í...", Constants.bbs_url,
+        new RequestingTask(this, "æ­£åœ¨å‘é€...", Constants.bbs_url,
                 Constants.REQUEST_BBS_POST).execute(arrayList);
 
     }
 
-    @SuppressWarnings("unchecked")
     void edit() {
         String title = ViewSetting.getEditTextValue(this, R.id.bbs_postpage_title).trim();
         String text = ViewSetting.getEditTextValue(this, R.id.bbs_postpage_text);
         if ("".equals(title)) {
-            CustomToast.showErrorToast(this, "±êÌâ²»ÄÜÎª¿Õ£¡", 1500);
+            CustomToast.showErrorToast(this, "æ ‡é¢˜ä¸èƒ½ä¸ºç©º", 1500);
             return;
         }
-        //if (!text.contains("·¢×Ô CAPUBBS"))
-        //    text += "\n\n--\n·¢×Ô CAPUBBS (Android " + Constants.version + ")\n";
+        //if (!text.contains("æ¥è‡ª CAPUBBS"))
+        //    text += "\n\n--\næ¥è‡ª CAPUBBS (Android " + Constants.version + ")\n";
         String sig="0";
         if (((RadioButton)findViewById(R.id.sig1)).isChecked()) sig="1";
         if (((RadioButton)findViewById(R.id.sig2)).isChecked()) sig="2";
@@ -145,7 +142,7 @@ public class PostActivity extends BaseActivity {
         arrayList.add(new Parameters("sig", sig));
         arrayList.add(new Parameters("tid", threadid));
         arrayList.add(new Parameters("pid", postid));
-        new RequestingTask(this, "ÕıÔÚĞŞ¸Ä...", Constants.bbs_url,
+        new RequestingTask(this, "æ­£åœ¨ç¼–è¾‘...", Constants.bbs_url,
                 Constants.REQUEST_BBS_POST).execute(arrayList);
 
     }
@@ -159,10 +156,14 @@ public class PostActivity extends BaseActivity {
                 return;
             }
             setResult(RESULT_OK);
-            CustomToast.showSuccessToast(this, "·¢±í³É¹¦£¡");
+            if ("edit".equals(type)) {
+                CustomToast.showSuccessToast(this, "ç¼–è¾‘æˆåŠŸï¼");
+            } else {
+                CustomToast.showSuccessToast(this, "å‘é€æˆåŠŸï¼");
+            }
             finish();
         } catch (Exception e) {
-            CustomToast.showErrorToast(this, "·¢±íÊ§°Ü", 1500);
+            CustomToast.showErrorToast(this, "æ“ä½œå¤±è´¥", 1500);
         }
     }
 
@@ -172,7 +173,7 @@ public class PostActivity extends BaseActivity {
             int code = jsonObject.getInt("code");
             if (code != 0) {
                 CustomToast.showErrorToast(this,
-                        jsonObject.optString("msg", "ÄÚÈİÀ­È¡Ê§°Ü"), 1300);
+                        jsonObject.optString("msg", "æ•°æ®è·å–å¤±è´¥"), 1300);
                 super.wantToExit();
                 return;
             }
@@ -185,7 +186,7 @@ public class PostActivity extends BaseActivity {
             ((EditText) findViewById(R.id.bbs_postpage_text)).setSelection(0);
 
         } catch (Exception e) {
-            CustomToast.showErrorToast(this, "ÄÚÈİ»ñÈ¡Ê§°Ü", 1300);
+            CustomToast.showErrorToast(this, "æ•°æ®è·å–å¤±è´¥", 1300);
             super.wantToExit();
         }
     }

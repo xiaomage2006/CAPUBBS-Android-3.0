@@ -31,7 +31,7 @@ public class MyCalendar {
     }
 
     /**
-     * return "ĞÇÆÚÒ»" if Monday, ..., "ĞÇÆÚÈÕ" if Sunday
+     * return "" if Monday, ..., "" if Sunday
      *
      * @param calendar
      * @return
@@ -41,23 +41,23 @@ public class MyCalendar {
 
         switch (dof) {
             case Calendar.SUNDAY:
-                return "ĞÇÆÚÈÕ";
+                return "0";
             case Calendar.MONDAY:
-                return "ĞÇÆÚÒ»";
+                return "1";
             case Calendar.TUESDAY:
-                return "ĞÇÆÚ¶ş";
+                return "2";
             case Calendar.WEDNESDAY:
-                return "ĞÇÆÚÈı";
+                return "3";
             case Calendar.THURSDAY:
-                return "ĞÇÆÚËÄ";
+                return "4";
             case Calendar.FRIDAY:
-                return "ĞÇÆÚÎå";
+                return "5";
         }
-        return "ĞÇÆÚÁù";
+        return "6";
     }
 
     /**
-     * ·µ»Ø daysAfterÌìºóÊÇĞÇÆÚ¼¸µÄÎÄ×Ö°æ
+     * daysAfter
      *
      * @param calendar
      * @param daysAfter
@@ -70,11 +70,11 @@ public class MyCalendar {
     }
 
     /**
-     * ·µ»ØÁ½¸öÈÕÆÚÖ®¼äÏà²î¶àÉÙÌì
+     * è®¡ç®—ä¸¤ä¸ªæ—¥æœŸä¹‹é—´ç›¸å·®çš„å¤©æ•°
      *
      * @param calendar1
      * @param calendar2
-     * @return Á½¸öÈÕÆÚÌìÊı²îµÄ¡¾¾ø¶ÔÖµ¡¿
+     * @return ä¸¤ä¸ªæ—¥æœŸä¹‹é—´ç›¸å·®çš„å¤©æ•°
      */
     public static int getDeltaDays(Calendar calendar1, Calendar calendar2) {
         return Math.abs((int) (((calendar1.getTimeInMillis() - standard.getTimeInMillis()) / (1000 * 86400)
@@ -83,10 +83,10 @@ public class MyCalendar {
     }
 
     /**
-     * ·µ»Ø½ñÈÕ¾àÀëdate»¹²î¶àÉÙÌì
+     * è¿”å›è·ç¦»æŒ‡å®šæ—¥æœŸè¿˜æœ‰å¤šå°‘å¤©
      *
-     * @param date ¸ñÊ½Îª"yyyy-MM-dd"
-     * @return -1 ´ú±íÒÑ¾­¹ıÈ¥£¬·ñÔòÎª»¹Ê£ÌìÊı(>0)
+     * @param date æ ¼å¼ä¸º"yyyy-MM-dd"
+     * @return -1 æ—¥æœŸå·²è¿‡æœŸï¼Œå¦åˆ™ä¸ºå‰©ä½™å¤©æ•°(>0)
      */
     public static int getDaysLeft(String date) {
         Calendar calendar = Calendar.getInstance();
@@ -108,7 +108,7 @@ public class MyCalendar {
     }
 
     /**
-     * ¼ÆËãÁ½¸öÈÕÆÚÖ®¼ä²îÁË¶àÉÙ¸öĞÇÆÚ
+     * è®¡ç®—ä¸¤ä¸ªæ—¥æœŸä¹‹é—´ç›¸å·®å¤šå°‘ä¸ªæ˜ŸæœŸ
      *
      * @param calendar1
      * @param calendar2
@@ -120,7 +120,7 @@ public class MyCalendar {
     }
 
     /**
-     * »ñÈ¡¹ıÈ¥ÁË¶àÉÙÖÜ
+     * è·å–è¿‡å»ç»è¿‡çš„æ˜ŸæœŸæ•°
      *
      * @param calendar
      * @param daysAfter
@@ -131,8 +131,21 @@ public class MyCalendar {
         return (today + daysAfter - 1) / 7;
     }
 
+    /** ThreadLocal ç¼“å­˜ SimpleDateFormatï¼Œé¿å…åœ¨ getView() ä¸­åå¤åˆ›å»º */
+    private static final ThreadLocal<SimpleDateFormat> sDateTimeFormatter =
+            new ThreadLocal<SimpleDateFormat>() {
+                @Override
+                protected SimpleDateFormat initialValue() {
+                    return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                }
+            };
+
     public static String format(long timestamp) {
-        return format(timestamp, "yyyy-MM-dd HH:mm:ss");
+        try {
+            return sDateTimeFormatter.get().format(new Date(timestamp));
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public static String format(long timestamp, String pattern) {

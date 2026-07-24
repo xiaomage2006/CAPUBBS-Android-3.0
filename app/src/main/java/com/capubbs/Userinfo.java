@@ -37,7 +37,7 @@ public class Userinfo {
     public static void autoLogin(BBSActivity bbsActivity) {
         if ("".equals(username)) return;
         new Thread(() -> {
-            ArrayList<Parameters> arrayList = new ArrayList<Parameters>();
+            ArrayList<Parameters> arrayList = new ArrayList<>();
             arrayList.add(new Parameters("ask", "login"));
             arrayList.add(new Parameters("username", username));
             arrayList.add(new Parameters("password", Util.md5(password)));
@@ -53,7 +53,6 @@ public class Userinfo {
         givehint = false;
     }
 
-    @SuppressWarnings("unchecked")
     public static void login(BBSActivity bbsActivity) {
         if ("".equals(username)) {
             showLoginView(bbsActivity);
@@ -66,7 +65,7 @@ public class Userinfo {
         arrayList.add(new Parameters("os","android"));
         arrayList.add(new Parameters("device", android.os.Build.MODEL));
         arrayList.add(new Parameters("version", android.os.Build.VERSION.RELEASE));
-        new RequestingTask(bbsActivity, "���ڵ�¼ ...", Constants.bbs_url,
+        new RequestingTask(bbsActivity, "正在登录...", Constants.bbs_url,
                 Constants.REQUEST_BBS_LOGIN).execute(arrayList);
         givehint = true;
     }
@@ -79,14 +78,14 @@ public class Userinfo {
         dialog.setContentView(R.layout.bbs_login_view);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
-        dialog.setTitle("��¼CAPUBBS");
+        dialog.setTitle("登录CAPUBBS");
         ViewSetting.setEditTextValue(dialog, R.id.username, username);
         ViewSetting.setEditTextValue(dialog, R.id.password, password);
         ViewSetting.setOnClickListener(dialog, R.id.bbs_login, v -> {
             String u = ViewSetting.getEditTextValue(dialog, R.id.username).trim(),
                     p = ViewSetting.getEditTextValue(dialog, R.id.password).trim();
             if ("".equals(u) || "".equals(p)) {
-                CustomToast.showInfoToast(bbsActivity, "�˺Ż����벻��Ϊ�գ�", 1500);
+                CustomToast.showInfoToast(bbsActivity, "用户名或密码不能为空", 1500);
                 return;
             }
             username = u;
@@ -113,13 +112,13 @@ public class Userinfo {
             } catch (Exception e) {
             }
             if (givehint)
-                CustomToast.showSuccessToast(bbsActivity, "��¼�ɹ���", 1000);
+                CustomToast.showSuccessToast(bbsActivity, "登录成功", 1000);
             givehint = false;
             //	BadgeView.show(BBSActivity.bbsActivity, BBSActivity.bbsActivity.findViewById(R.id.bbs_bottom_img_me)
             //			, "new");
             SettingsFragment.set(bbsActivity);
         } catch (Exception e) {
-            CustomToast.showErrorToast(bbsActivity, "��¼ʧ��");
+            CustomToast.showErrorToast(bbsActivity, "登录失败");
         }
 
     }
@@ -131,6 +130,31 @@ public class Userinfo {
         SettingsFragment.set(bbsActivity);
         BadgeView.show(bbsActivity,
                 bbsActivity.findViewById(R.id.bbs_bottom_img_settings), "");
+    }
+
+    // 判断是否已登录（token 非空）
+    public static boolean isLoggedIn() {
+        return token != null && !"".equals(token);
+    }
+
+    // 要求登录：未登录时显示提示并返回 false，已登录返回 true
+    public static boolean requireLogin(android.content.Context context) {
+        if (!isLoggedIn()) {
+            CustomToast.showInfoToast(context, "请先登录");
+            return false;
+        }
+        return true;
+    }
+
+    // 获取当前用户名
+    public static String getUsername() {
+        return username == null ? "" : username;
+    }
+
+    // 判断作者是否为当前用户
+    public static boolean isOwner(String author) {
+        if (author == null) return false;
+        return author.equals(getUsername());
     }
 
 }

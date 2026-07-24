@@ -12,6 +12,8 @@ public class PostInfo {
     int lzl;
     String content;
     String sig;
+    String sigContent;
+    boolean sigLoaded;
     ArrayList<String> imgs;
 
     public PostInfo(String _author, int _pid, int _fid, String _time, int _lzl, String _content, String _sig) {
@@ -22,6 +24,8 @@ public class PostInfo {
         lzl=_lzl;
         content=_content;
         sig=_sig;
+        sigContent = "";
+        sigLoaded = false;
         imgs=new ArrayList<>();
     }
 }

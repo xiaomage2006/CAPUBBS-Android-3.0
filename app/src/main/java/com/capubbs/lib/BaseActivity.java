@@ -1,10 +1,12 @@
 package com.capubbs.lib;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.ViewConfiguration;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -49,18 +51,18 @@ public abstract class BaseActivity extends AppCompatActivity {
                 menuKeyField.setBoolean(config, false);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("BaseActivity", "getOverflowMenu error", e);
         }
     }
 
     private void setIconEnable(Menu menu, boolean enable) {
         try {
-            Class<?> clazz = Class.forName("android.support.v7.view.menu.MenuBuilder");
+            Class<?> clazz = Class.forName("androidx.appcompat.view.menu.MenuBuilder");
             Method m = clazz.getDeclaredMethod("setOptionalIconsVisible", boolean.class);
             m.setAccessible(true);
             m.invoke(menu, enable);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("BaseActivity", "setIconEnable error", e);
         }
     }
 

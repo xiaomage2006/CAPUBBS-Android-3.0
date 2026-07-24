@@ -3,20 +3,20 @@ package com.capubbs;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+import androidx.fragment.app.Fragment;
+
 import com.capubbs.lib.Constants;
 import com.capubbs.lib.MyCalendar;
 import com.capubbs.lib.RequestingTask;
+import com.capubbs.lib.Util;
 import com.capubbs.lib.ViewSetting;
 import com.capubbs.lib.XML2Json;
 import com.capubbs.lib.view.CustomToast;
@@ -31,8 +31,8 @@ public class SearchFragment extends Fragment {
     static View searchView;
     static String searchBoard;
     static String searchType;
-    static ArrayList<String> boards = new ArrayList<String>();
-    static ArrayList<SearchInfo> searchInfos = new ArrayList<SearchInfo>();
+    static ArrayList<String> boards = new ArrayList<>();
+    static ArrayList<SearchInfo> searchInfos = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,15 +45,15 @@ public class SearchFragment extends Fragment {
 
     public static void set(BBSActivity bbsActivity) {
         Spinner spinner = (Spinner) searchView.findViewById(R.id.bbs_search_type);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(bbsActivity,
-                android.R.layout.simple_spinner_item, new String[]{"ËÑË÷±êÌâ", "ËÑË÷È«ÎÄ"});
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(bbsActivity,
+                android.R.layout.simple_spinner_item, new String[]{"æœç´¢æ ‡é¢˜", "å…¨æ–‡æœç´¢"});
         spinner.setAdapter(adapter);
         ViewSetting.setOnClickListener(searchView, R.id.bbs_search_confirm, v -> search(bbsActivity));
 
         boards = Board.getNames();
 
         Spinner boardspinner = (Spinner) searchView.findViewById(R.id.bbs_search_board);
-        ArrayAdapter<String> boardadapter = new ArrayAdapter<String>(bbsActivity,
+        ArrayAdapter<String> boardadapter = new ArrayAdapter<>(bbsActivity,
                 android.R.layout.simple_spinner_item, boards);
         boardspinner.setAdapter(boardadapter);
 
@@ -69,7 +69,7 @@ public class SearchFragment extends Fragment {
                             R.layout.bbs_thread_item, parent, false);
                     String title = "<font color='#006060'>" + threadInfo.title + "</font>";
                     ViewSetting.setTextView(convertView, R.id.bbs_thread_item_title,
-                            Html.fromHtml(title));
+                            Util.fromHtml(title));
                     ViewSetting.setTextView(convertView, R.id.bbs_thread_item_author,
                             threadInfo.author);
                     ViewSetting.setTextView(convertView, R.id.bbs_thread_item_time,
@@ -80,8 +80,8 @@ public class SearchFragment extends Fragment {
                             R.layout.bbs_search_item, parent, false);
                     String title = "<font color='#006060'>" + threadInfo.title + "</font>";
                     ViewSetting.setTextView(convertView, R.id.title,
-                            Html.fromHtml(title));
-                    ViewSetting.setTextView(convertView, R.id.text, Html.fromHtml(threadInfo.content));
+                            Util.fromHtml(title));
+                    ViewSetting.setTextView(convertView, R.id.text, Util.fromHtml(threadInfo.content));
                     ViewSetting.setTextView(convertView, R.id.floor,
                             threadInfo.pid+"");
                     ViewSetting.setTextView(convertView, R.id.author,
@@ -94,19 +94,16 @@ public class SearchFragment extends Fragment {
 
             @Override
             public long getItemId(int position) {
-                // TODO Auto-generated method stub
                 return 0;
             }
 
             @Override
             public Object getItem(int position) {
-                // TODO Auto-generated method stub
                 return null;
             }
 
             @Override
             public int getCount() {
-                // TODO Auto-generated method stub
                 return searchInfos.size();
             }
         });
@@ -121,18 +118,17 @@ public class SearchFragment extends Fragment {
         });
     }
 
-    @SuppressWarnings("unchecked")
     public static void search(BBSActivity bbsActivity) {
         Spinner boardSpinner = (Spinner) searchView.findViewById(R.id.bbs_search_board);
         String string = (String) boardSpinner.getSelectedItem();
         if ("".equals(string)) {
-            CustomToast.showInfoToast(bbsActivity, "ÇëÑ¡Ôñ°æÃæ£¡", 1500);
+            CustomToast.showInfoToast(bbsActivity, "è¯·é€‰æ‹©æ¿å—ï¼", 1500);
             return;
         }
         String text = ViewSetting.getEditTextValue(searchView, R.id.bbs_search_text).trim();
         String author = ViewSetting.getEditTextValue(searchView, R.id.bbs_search_author).trim();
         if ("".equals(text) && "".equals(author)) {
-            CustomToast.showInfoToast(bbsActivity, "Ã»ÓĞËÑË÷µÄÄÚÈİ£¡", 1500);
+            CustomToast.showInfoToast(bbsActivity, "æ²¡æœ‰è¾“å…¥æœç´¢æ•°æ®ï¼", 1500);
             return;
         }
         Spinner type = (Spinner) searchView.findViewById(R.id.bbs_search_type);
@@ -140,14 +136,14 @@ public class SearchFragment extends Fragment {
         int index = type.getSelectedItemPosition();
         if (index == 1) searchType = "post";
 
-        ArrayList<Parameters> arrayList = new ArrayList<Parameters>();
+        ArrayList<Parameters> arrayList = new ArrayList<>();
         arrayList.add(new Parameters("ask", "search"));
         arrayList.add(new Parameters("token", Userinfo.token));
         arrayList.add(new Parameters("bid", Board.getIdByName(string)));
         arrayList.add(new Parameters("type", searchType));
         arrayList.add(new Parameters("text", text));
         arrayList.add(new Parameters("username",author));
-        new RequestingTask(bbsActivity, "ÕıÔÚËÑË÷..",
+        new RequestingTask(bbsActivity, "æœç´¢ä¸­...",
                 Constants.bbs_url, Constants.REQUEST_BBS_SEARCH)
                 .execute(arrayList);
         searchBoard = string;
@@ -183,14 +179,14 @@ public class SearchFragment extends Fragment {
             baseAdapter.notifyDataSetChanged();
 
             if (len>=100)
-                CustomToast.showInfoToast(bbsActivity, "Ö»ÏÔÊ¾Ç°100Ìõ½á¹û£¡",
+                CustomToast.showInfoToast(bbsActivity, "åªæ˜¾ç¤ºå‰100æ¡æœç´¢ç»“æœ",
                         1500);
             if (searchInfos.size() == 0)
-                CustomToast.showInfoToast(bbsActivity, "Ã»ÓĞËÑË÷µ½½á¹û£¡",
+                CustomToast.showInfoToast(bbsActivity, "æ²¡æœ‰æ‰¾åˆ°ç›¸å…³å†…å®¹",
                         1500);
 
         } catch (Exception e) {
-            CustomToast.showErrorToast(bbsActivity, "ËÑË÷Ê§°Ü", 1500);
+            CustomToast.showErrorToast(bbsActivity, "æœç´¢å¤±è´¥", 1500);
         }
     }
 

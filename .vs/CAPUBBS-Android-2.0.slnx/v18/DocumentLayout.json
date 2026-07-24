@@ -1,0 +1,135 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\GitHub\\CAPUBBS-Android-2.0\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\ViewActivity.java||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\src\\main\\java\\com\\capubbs\\ViewActivity.java||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\ViewPost.java||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\src\\main\\java\\com\\capubbs\\ViewPost.java||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\lib\\Util.java||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\src\\main\\java\\com\\capubbs\\lib\\Util.java||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\Userinfo.java||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\src\\main\\java\\com\\capubbs\\Userinfo.java||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\PostActivity.java||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\src\\main\\java\\com\\capubbs\\PostActivity.java||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\lib\\Constants.java||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\src\\main\\java\\com\\capubbs\\lib\\Constants.java||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 152,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Util.java",
+              "DocumentMoniker": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\lib\\Util.java",
+              "RelativeDocumentMoniker": "app\\src\\main\\java\\com\\capubbs\\lib\\Util.java",
+              "ToolTip": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\lib\\Util.java",
+              "RelativeToolTip": "app\\src\\main\\java\\com\\capubbs\\lib\\Util.java",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAFYAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
+              "WhenOpened": "2026-07-22T12:54:59.261Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ViewPost.java",
+              "DocumentMoniker": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\ViewPost.java",
+              "RelativeDocumentMoniker": "app\\src\\main\\java\\com\\capubbs\\ViewPost.java",
+              "ToolTip": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\ViewPost.java",
+              "RelativeToolTip": "app\\src\\main\\java\\com\\capubbs\\ViewPost.java",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAIwHwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
+              "WhenOpened": "2026-07-22T11:51:07.232Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Constants.java",
+              "DocumentMoniker": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\lib\\Constants.java",
+              "RelativeDocumentMoniker": "app\\src\\main\\java\\com\\capubbs\\lib\\Constants.java",
+              "ToolTip": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\lib\\Constants.java",
+              "RelativeToolTip": "app\\src\\main\\java\\com\\capubbs\\lib\\Constants.java",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAIwBEAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
+              "WhenOpened": "2026-07-22T11:46:01.016Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PostActivity.java",
+              "DocumentMoniker": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\PostActivity.java",
+              "RelativeDocumentMoniker": "app\\src\\main\\java\\com\\capubbs\\PostActivity.java",
+              "ToolTip": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\PostActivity.java",
+              "RelativeToolTip": "app\\src\\main\\java\\com\\capubbs\\PostActivity.java",
+              "ViewState": "AgIAAI4AAAAAAAAAAAAAACQAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
+              "WhenOpened": "2026-07-22T11:22:02.208Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Userinfo.java",
+              "DocumentMoniker": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\Userinfo.java",
+              "RelativeDocumentMoniker": "app\\src\\main\\java\\com\\capubbs\\Userinfo.java",
+              "ToolTip": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\Userinfo.java",
+              "RelativeToolTip": "app\\src\\main\\java\\com\\capubbs\\Userinfo.java",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAIwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
+              "WhenOpened": "2026-07-22T11:21:26.652Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ViewActivity.java",
+              "DocumentMoniker": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\ViewActivity.java",
+              "RelativeDocumentMoniker": "app\\src\\main\\java\\com\\capubbs\\ViewActivity.java",
+              "ToolTip": "D:\\GitHub\\CAPUBBS-Android-2.0\\app\\src\\main\\java\\com\\capubbs\\ViewActivity.java",
+              "RelativeToolTip": "app\\src\\main\\java\\com\\capubbs\\ViewActivity.java",
+              "ViewState": "AgIAAHMBAAAAAAAAAAAIwHsBAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
+              "WhenOpened": "2026-07-22T11:17:28.632Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 248,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

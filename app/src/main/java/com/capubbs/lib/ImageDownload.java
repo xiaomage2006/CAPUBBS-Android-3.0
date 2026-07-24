@@ -20,12 +20,12 @@ public class ImageDownload {
     public static final int IMAGE_REQUEST_FINISHED = 0;
     public static final int IMAGE_REQUEST_FAILED = 1;
 
-    ArrayList<ImageView> imageViews = new ArrayList<ImageView>();
-    ArrayList<String> urls = new ArrayList<String>();
+    ArrayList<ImageView> imageViews = new ArrayList<>();
+    ArrayList<String> urls = new ArrayList<>();
     Activity activity;
     EventHandler eventHandler;
     @SuppressLint("UseSparseArrays")
-    HashMap<Integer, Drawable> hashMap = new HashMap<Integer, Drawable>();
+    HashMap<Integer, Drawable> hashMap = new HashMap<>();
 
     public ImageDownload(Activity _activity, ImageView imageView,
                          String url) {
@@ -38,34 +38,27 @@ public class ImageDownload {
     public ImageDownload(Activity _activity, ArrayList<ImageView> _imageViews,
                          ArrayList<String> _urls) {
         activity = _activity;
-        imageViews = new ArrayList<ImageView>(_imageViews);
-        urls = new ArrayList<String>(_urls);
+        imageViews = new ArrayList<>(_imageViews);
+        urls = new ArrayList<>(_urls);
         eventHandler = new EventHandler(activity.getMainLooper());
     }
 
-    /**
-     * 仅当你在构造函数中传入Activity与ImageView时才可被调用
-     * 否则此函数将什么都不做
-     */
     public void requestAndSetImages() {
         if (activity == null || imageViews == null) return;
         int len = imageViews.size();
         for (int i = 0; i < len; i++) {
             final int j = i;
-            new Thread(new Runnable() {
-
-                @Override
-                public void run() {
+            new Thread(() -> {
                     try {
-                        InputStream inputStream = WebConnection.connect(urls.get(j));
+                        InputStream inputStream = WebConnection.connectForDownload(urls.get(j));
                         Drawable drawable = Drawable.createFromStream(inputStream, j + ".png");
+                        inputStream.close();
                         eventHandler.sendMessage(Message.obtain(
                                 eventHandler, IMAGE_REQUEST_FINISHED, j, 0, drawable));
                     } catch (Exception e) {
                         eventHandler.sendMessage(Message.obtain(
                                 eventHandler, IMAGE_REQUEST_FAILED, j, 0));
                     }
-                }
             }).start();
         }
     }

@@ -3,23 +3,21 @@ package com.capubbs.lib.subactivity;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
-import android.app.DownloadManager.Request;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.webkit.CookieManager;
-import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
 import android.webkit.URLUtil;
 import android.webkit.WebChromeClient;
-import android.webkit.WebSettings.LayoutAlgorithm;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.capubbs.R;
 import com.capubbs.lib.ImageRequest;
@@ -27,7 +25,6 @@ import com.capubbs.lib.view.CustomToast;
 
 import java.io.File;
 import java.net.URL;
-import java.util.HashMap;
 
 public class MyWebView {
     SubActivity subActivity;
@@ -43,16 +40,15 @@ public class MyWebView {
     private void initWebView(WebView webView, boolean single_column) {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.addJavascriptInterface(new JSInterface(subActivity), "imageclick");
-        //webView.setVerticalScrollBarEnabled(false);
         webView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_INSET);
         if (single_column) {
             webView.getSettings().setUseWideViewPort(false);
             webView.setHorizontalScrollBarEnabled(false);
-            webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.SINGLE_COLUMN);
+            webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
         }
         else {
             webView.getSettings().setUseWideViewPort(true);
-            webView.getSettings().setLayoutAlgorithm(LayoutAlgorithm.SINGLE_COLUMN);
+            webView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
             webView.getSettings().setSupportZoom(true);
             webView.getSettings().setLoadWithOverviewMode(true);
             webView.getSettings().setBuiltInZoomControls(true);
@@ -63,23 +59,25 @@ public class MyWebView {
                 URL url2 = new URL(url);
                 String cookie = cookieManager.getCookie(url2.getHost());
 
-                Request request = new Request(Uri.parse(url));
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
                 request.addRequestHeader("Cookie", cookie);
                 request.setMimeType(mimetype);
-                request.allowScanningByMediaScanner();
-                request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+                    request.allowScanningByMediaScanner();
+                }
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                 String filename = URLUtil.guessFileName(url, contentDisposition, mimetype);
-                new File(Environment.getExternalStorageDirectory() + "/Download/capubbs/").mkdirs();
-                File file = new File(Environment.getExternalStorageDirectory() + "/Download/capubbs/" + filename);
+                File downloadDir = subActivity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                File file = new File(downloadDir, "capubbs/" + filename);
                 if (file.exists()) file.delete();
                 request.setDestinationUri(Uri.fromFile(file));
-                request.setTitle("ÕýÔÚÏÂÔØ" + filename + "...");
-                request.setDescription("ÎÄ¼þ±£´æÔÚ" + file.getAbsolutePath());
+                request.setTitle("æ­£åœ¨ä¸‹è½½" + filename + "...");
+                request.setDescription("æ–‡ä»¶ä¿å­˜åœ¨" + file.getAbsolutePath());
                 DownloadManager downloadManager = (DownloadManager) subActivity.getSystemService(Context.DOWNLOAD_SERVICE);
                 downloadManager.enqueue(request);
 
-                CustomToast.showInfoToast(subActivity, "ÎÄ¼þÏÂÔØÖÐ£¬ÇëÔÚÍ¨ÖªÀ¸²é¿´½ø¶È");
+                CustomToast.showInfoToast(subActivity, "æ–‡ä»¶ä¸‹è½½ä¸­ï¼Œç¨åŽé€šçŸ¥æ æŸ¥çœ‹è¿›åº¦");
             } catch (Exception e) {
                 subActivity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
             }
@@ -114,7 +112,7 @@ public class MyWebView {
                 else if (!"".equals(string))
                     subActivity.setTitle(string);
                 else
-                    subActivity.setTitle("²é¿´ÍøÒ³");
+                    subActivity.setTitle("æŸ¥çœ‹ç½‘é¡µ");
 
                 view.loadUrl("javascript:(function(){"
                         + "var objs=document.getElementsByTagName(\"img\");"
@@ -131,8 +129,8 @@ public class MyWebView {
             @Override
             public boolean onJsAlert(WebView view, String url,
                                      String message, final JsResult result) {
-                new AlertDialog.Builder(subActivity).setTitle("ÌáÊ¾").setMessage(message)
-                        .setPositiveButton("È·ÈÏ", (dialog, which) -> {
+                new AlertDialog.Builder(subActivity).setTitle("æç¤º").setMessage(message)
+                        .setPositiveButton("ç¡®å®š", (dialog, which) -> {
                             result.confirm();
                         }).setCancelable(true).setOnCancelListener(dialog -> result.confirm()).show();
                 return true;
@@ -152,11 +150,7 @@ public class MyWebView {
                 android.R.color.holo_green_light,
                 android.R.color.holo_blue_bright,
                 android.R.color.holo_orange_light);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            public void onRefresh() {
-                subActivity.setRefresh();
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> subActivity.setRefresh());
 
         loading = true;
         swipeRefreshLayout.setRefreshing(loading);
@@ -182,7 +176,7 @@ public class MyWebView {
                 android.R.color.holo_orange_light);
         swipeRefreshLayout.setOnRefreshListener(() -> subActivity.setRefresh());
         loading = false;
-        if (title == null || "".equals(title.trim())) title = "²é¿´ÍøÒ³";
+        if (title == null || "".equals(title.trim())) title = "æŸ¥çœ‹ç½‘é¡µ";
         subActivity.setTitle(title);
         subActivity.webView =
                 (WebView) subActivity.findViewById(R.id.subactivity_webview);

@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.ContextMenu;
@@ -19,6 +18,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import com.capubbs.lib.BaseActivity;
+import com.capubbs.lib.CenterTagHandler;
 import com.capubbs.lib.Constants;
 import com.capubbs.lib.ImageRequest;
 import com.capubbs.lib.MyBitmapFactory;
@@ -63,11 +63,14 @@ public class ViewActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DisplayMetrics displayMetrics=new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        listWidth=(int)(displayMetrics.widthPixels-(getResources().getDisplayMetrics().density*20+0.5f));
+        // ÂÖàËÆæÁΩÆ‰∏Ä‰∏™ÈªòËÆ§Â∏ÉÂ±ÄÔºåÁ°Æ‰øù Activity ÂßãÁªàÊúâÊúâÊïàÁöÑÂÜÖÂÆπËßÜÂõæ
+        setContentView(R.layout.bbs_thread_listview);
+
+        listWidth = (int) (getResources().getDisplayMetrics().widthPixels - (getResources().getDisplayMetrics().density * 20 + 0.5f));
 
         init();
+        // init Â§±Ë¥•Êó∂ activity Ê≠£Âú® finishÔºå‰∏çÂÜçÁªßÁª≠
+        if (board == null || "".equals(board)) return;
         String type = getIntent().getStringExtra("type");
         viewThread=new ViewThread(this);
         viewPost=new ViewPost(this);
@@ -80,7 +83,7 @@ public class ViewActivity extends BaseActivity {
             startFromParent = true;
             String threadid = getIntent().getStringExtra("tid");
             if (threadid == null) {
-                CustomToast.showErrorToast(this, "√ª”–tid£°");
+                CustomToast.showErrorToast(this, "Ê≤°ÊúâtidÂèÇÊï∞");
                 super.wantToExit();
                 return;
             }
@@ -89,21 +92,22 @@ public class ViewActivity extends BaseActivity {
         }
     }
 
-    void init() {
+    boolean init() {
         board = getIntent().getStringExtra("bid");
         if (board == null || "".equals(board)) {
-            CustomToast.showErrorToast(this, "√ª”–’‚∏ˆ∞Ê√Ê£°");
+            CustomToast.showErrorToast(this, "Ê≤°ÊúâÊùøÂùóÂèÇÊï∞ÔºÅ");
             super.wantToExit();
-            return;
+            return false;
         }
 
         Board bd = Board.boards.get(board);
         if (bd == null) {
-            CustomToast.showErrorToast(this, "√ª”–’‚∏ˆ∞Ê√Ê£°");
+            CustomToast.showErrorToast(this, "Ê≤°ÊúâËØ•ÊùøÂùóÔºÅ");
             super.wantToExit();
-            return;
+            return false;
         }
         boardName = bd.name;
+        return true;
     }
 
     public void finishRequest(int type, String string) {
@@ -111,6 +115,8 @@ public class ViewActivity extends BaseActivity {
             viewThread.finishRequest(string);
         if (type == Constants.REQUEST_BBS_GET_POST)
             viewPost.finishRequest(string);
+        if (type == Constants.REQUEST_BBS_DELETE)
+            viewPost.finishDelete(string);
     }
 
     void updateImage(int postid) {
@@ -126,12 +132,12 @@ public class ViewActivity extends BaseActivity {
                             View view = listView.getChildAt(j);
                             if (view == null) continue;
                             if ((Integer) view.getTag() != i) continue;
+                            String cleanedContent = Util.cleanHtmlContent(postInfo.content);
+                            
                             ViewSetting.setTextView(view, R.id.bbs_post_item_text,
-                                    Html.fromHtml(postInfo.content, source -> {
-                                        if (source.startsWith("/"))
-                                            source = "http://www.chexie.net" + source;
-                                        else if (source.startsWith("../"))
-                                            source = "http://www.chexie.net/bbs"+source.substring(2);
+                                    Html.fromHtml(cleanedContent + "<br>", Html.FROM_HTML_MODE_LEGACY, source -> {
+                                        if (source == null) return null;
+                                        source = Util.fixRelativeUrl(source);
                                         final File file = MyFile.getCache(ViewActivity.this, Util.getHash(source));
                                         if (file.exists()) {
                                             Bitmap bitmap = MyBitmapFactory.getCompressedBitmap(file.getAbsolutePath(), 2.5);
@@ -139,8 +145,7 @@ public class ViewActivity extends BaseActivity {
                                                 Drawable drawable = new BitmapDrawable(ViewActivity.this.getResources(), bitmap);
                                                 int width=drawable.getIntrinsicWidth(), height=drawable.getIntrinsicHeight();
                                                 width*=1.8;height*=1.8;
-                                                if (width>ViewActivity.listWidth)
-                                                {
+                                                if (width>ViewActivity.listWidth) {
                                                     height=(ViewActivity.listWidth*height)/width;
                                                     width=ViewActivity.listWidth;
                                                 }
@@ -149,9 +154,8 @@ public class ViewActivity extends BaseActivity {
                                             }
                                         }
                                         return null;
-                                    }, null));
-                        } catch (Exception e) {
-                        }
+                                    }, new CenterTagHandler()));
+                        } catch (Exception e) {}
                     }
                 }
             }
@@ -168,9 +172,8 @@ public class ViewActivity extends BaseActivity {
             if (viewThread.page < viewThread.totalPage)
                 menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_NEXT, Constants.MENU_BBS_VIEW_NEXT, "")
                         .setIcon(R.drawable.ic_chevron_right_white_36dp).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-            menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_EXTR, Constants.MENU_BBS_VIEW_EXTR,
-                    viewThread.isExtr?"≤Èø¥»´≤ø":"≤Èø¥æ´∆∑«¯");
-            menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_POST, Constants.MENU_BBS_VIEW_POST, "∑¢±Ì÷˜Ã‚");
+            menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_EXTR, Constants.MENU_BBS_VIEW_EXTR, viewThread.isExtr?"Êü•ÁúãÂÖ®ÈÉ®":"Êü•ÁúãÁ≤æÂçé");
+            menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_POST, Constants.MENU_BBS_VIEW_POST, "ÂèëË°®Êñ∞ËØùÈ¢ò");
         }
         if (showingPage == PAGE_POST) {
             if (viewPost.page > 1)
@@ -179,14 +182,13 @@ public class ViewActivity extends BaseActivity {
             if (viewPost.page < viewPost.totalPage)
                 menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_NEXT, Constants.MENU_BBS_VIEW_NEXT, "")
                         .setIcon(R.drawable.ic_chevron_right_white_36dp).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-            menu.add(Menu.NONE, Constants.MENU_BBS_FAVORITE, Constants.MENU_BBS_FAVORITE,
-                    " ’≤ÿ¥À÷˜Ã‚Ã˚");
-            menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_POST, Constants.MENU_BBS_VIEW_POST, "ªÿ∏¥");
-            menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_SHARE, Constants.MENU_BBS_VIEW_SHARE, "∑÷œÌ");
-            menu.add(Menu.NONE, Constants.MENU_BBS_OPEN_IN_BROWSER, Constants.MENU_BBS_OPEN_IN_BROWSER, "”√‰Ø¿¿∆˜¥Úø™");
+            menu.add(Menu.NONE, Constants.MENU_BBS_FAVORITE, Constants.MENU_BBS_FAVORITE, "Êî∂ËóèÊ≠§ËØùÈ¢ò");
+            menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_POST, Constants.MENU_BBS_VIEW_POST, "ÂõûÂ§ç");
+            menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_SHARE, Constants.MENU_BBS_VIEW_SHARE, "ÂàÜ‰∫´");
+            menu.add(Menu.NONE, Constants.MENU_BBS_OPEN_IN_BROWSER, Constants.MENU_BBS_OPEN_IN_BROWSER, "Âú®ÊµèËßàÂô®ÊâìÂºÄ");
         }
-        menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_JUMP, Constants.MENU_BBS_VIEW_JUMP, "Ã¯“≥");
-        menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_EXIT, Constants.MENU_BBS_VIEW_EXIT, "∑µªÿ ◊“≥");
+        menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_JUMP, Constants.MENU_BBS_VIEW_JUMP, "Ë∑≥ËΩ¨");
+        menu.add(Menu.NONE, Constants.MENU_BBS_VIEW_EXIT, Constants.MENU_BBS_VIEW_EXIT, "ËøîÂõûÈ¶ñÈ°µ");
         return true;
     }
 
@@ -212,11 +214,9 @@ public class ViewActivity extends BaseActivity {
             return true;
         }
         if (id == Constants.MENU_BBS_FAVORITE) {
-            if (FavoriteActivity.addFavorite(this, board, Integer.parseInt(threadid), viewPost.title,
-                    viewPost.postInfos.get(0).author)) {
-                CustomToast.showSuccessToast(this, " ’≤ÿ≥…π¶£°");
-            }
-            else CustomToast.showInfoToast(this, "ƒ„“— ’≤ÿ¥À÷˜Ã‚Ã˚£°");
+            if (FavoriteActivity.addFavorite(this, board, Integer.parseInt(threadid), viewPost.title, viewPost.postInfos.get(0).author)) {
+                CustomToast.showSuccessToast(this, "Êî∂ËóèÊàêÂäüÔºÅ");
+            } else CustomToast.showInfoToast(this, "ÊÇ®Â∑≤ÁªèÊî∂Ëóè‰∫ÜÊ≠§ËØùÈ¢ò");
             return true;
         }
         if (id == Constants.MENU_BBS_VIEW_SHARE && showingPage == PAGE_POST) {
@@ -240,15 +240,12 @@ public class ViewActivity extends BaseActivity {
             return true;
         }
         if (id == Constants.MENU_BBS_VIEW_JUMP) {
-            if (showingPage == PAGE_THREAD) {
-                viewThread.jump();
-            } else if (showingPage == PAGE_POST) {
-                viewPost.jump();
-            }
+            if (showingPage == PAGE_THREAD) viewThread.jump();
+            else if (showingPage == PAGE_POST) viewPost.jump();
             return true;
         }
         if (id == Constants.MENU_BBS_OPEN_IN_BROWSER) {
-            String url="https://www.chexie.net/bbs/content/?bid="+board+"&tid="+viewPost.tmpThreadid;
+            String url=Constants.base_url+"/bbs/content/?bid="+board+"&tid="+viewPost.tmpThreadid;
             Intent intent=new Intent(this, SubActivity.class);
             intent.putExtra("type", Constants.SUBACTIVITY_TYPE_WEBVIEW);
             intent.putExtra("url", url);
@@ -260,7 +257,6 @@ public class ViewActivity extends BaseActivity {
             super.wantToExit();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -271,14 +267,10 @@ public class ViewActivity extends BaseActivity {
             PostInfo postInfo = viewPost.postInfos.get(viewPost.index);
             String content = postInfo.content;
 
-            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_POST_LZL,
-                    Constants.CONTEXT_MENU_BBS_POST_LZL, "ªÿ∏¥¬•÷–¬•");
-            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_POST,
-                    Constants.CONTEXT_MENU_BBS_POST, "“˝”√");
-            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_EDIT,
-                    Constants.CONTEXT_MENU_BBS_EDIT, "±‡º≠");
+            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_POST_LZL, Constants.CONTEXT_MENU_BBS_POST_LZL, "ÂõûÂ§çÊ•º‰∏≠Ê•º");
+            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_EDIT, Constants.CONTEXT_MENU_BBS_EDIT, "ÁºñËæë");
+            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_DELETE, Constants.CONTEXT_MENU_BBS_DELETE, "Âà†Èô§");
 
-            // ºÏ≤‚Œƒ÷– «∑Ò¥Ê‘⁄URL
             urlNum = 0;
             Matcher matcher = Patterns.WEB_URL.matcher(content);
             ArrayList<String> urls=new ArrayList<>();
@@ -288,37 +280,27 @@ public class ViewActivity extends BaseActivity {
                 String url = content.substring(start, end);
                 String tmp = url.toLowerCase(Locale.getDefault());
                 if (tmp.startsWith("http://") || tmp.startsWith("https://")) {
-                    if (url.endsWith("'") || url.endsWith("\"")
-                            || url.endsWith(")") || url.endsWith("]")
-                            || url.endsWith("}"))
+                    if (url.endsWith("'") || url.endsWith("\"") || url.endsWith(")") || url.endsWith("]") || url.endsWith("}"))
                         url = url.substring(0, url.length() - 1);
                     url=url.replace("&amp;","&");
                     if (urls.contains(url)) continue;
                     urls.add(url);
 
-                    if (url.matches("http(s)?://(www\\.)?chexie.net/bbs/main(.+?)+")) {
+                    if (url.matches("https://(www\\.)?chexie\\.net/bbs/main(.+?)+")) {
                         String bid=Util.getValue(url, "bid");
                         if (Board.containBoard(bid)) {
-                            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum,
-                                    "¡¥Ω”£∫"+Board.getNameById(bid)+"∞Ê");
-                        }
-                        else
-                            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum,
-                                    url);
+                            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum, "ÊâìÂºÄ:"+Board.getNameById(bid)+"ÊùøÂùó");
+                        } else menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum, url);
                     }
-                    else if (url.matches("http(s)?://(www\\.)?chexie.net/bbs/content(.+?)+")) {
+                    else if (url.matches("https://(www\\.)?chexie\\.net/bbs/content(.+?)+")) {
                         String bid=Util.getValue(url, "bid");
                         if (Board.containBoard(bid)) {
-                            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum,
-                                    "¡¥Ω”£∫"+Board.getNameById(bid)+"∞Ê"+Util.getValue(url,"tid")+"Ã˚");
-                        }
-                        else menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum,
-                                url);
+                            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum, "ÊâìÂºÄ:"+Board.getNameById(bid)+"ÊùøÂùó"+Util.getValue(url,"tid")+"Â∏ñ");
+                        } else menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum, url);
                     }
-                    else if (url.startsWith("http://www.chexie.net/cgi-bin/bbs.pl?")) {
+                    else if (url.startsWith(Constants.base_url + "/cgi-bin/bbs.pl?")) {
                         String bid=Util.getValue(url,"b");
-                        if ("".equals(bid))
-                        {
+                        if ("".equals(bid)) {
                             String id=Util.getValue(url,"id");
                             if ("act".equals(id)) bid="1";
                             if ("capu".equals(id)) bid="2";
@@ -333,50 +315,21 @@ public class ViewActivity extends BaseActivity {
                         String str=Util.getValue(url,"see");
                         String tid="";
                         if (str.length()==4) {
-                            tid=((str.charAt(0)-'a')*26*26*26+(str.charAt(1)-'a')*26*26
-                                    +(str.charAt(2)-'a')*26+(str.charAt(3)-'a')+1)+"";
+                            tid=((str.charAt(0)-'a')*26*26*26+(str.charAt(1)-'a')*26*26+(str.charAt(2)-'a')*26+(str.charAt(3)-'a')+1)+"";
                         }
                         if (Board.containBoard(bid) && !"".equals(tid)) {
-                            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum,
-                                    "¡¥Ω”£∫"+Board.getNameById(bid)+"∞Ê"+tid+"Ã˚");
-                        }
-                        else menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum,
-                                url);
-
+                            menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum, "ÊâìÂºÄ:"+Board.getNameById(bid)+"ÊùøÂùó"+tid+"Â∏ñ");
+                        } else menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum, url);
                     }
-                    else menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum,
-                                url);
-
+                    else menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_URL + urlNum, Constants.CONTEXT_MENU_BBS_URL + urlNum, url);
                     urlNum++;
                 }
             }
-/*
-            // ºÏ≤‚Œƒ÷– «∑Ò¥Ê‘⁄image
-            Document document=Jsoup.parse(content);
-            Elements imgs=document.getElementsByTag("img");
-            imgNum=0;
-            for (int i=0;i<imgs.size();i++) {
-                Element img=imgs.get(i);
-                String src=img.attr("src");
-                if (src==null || "".equals(src)) continue;
-                if (src.startsWith("/bbsimg/expr") || src.matches("/bbsimg/[\\d]+\\.gif")) continue;
-                if (src.startsWith("/")) src="http://www.chexie.net"+src;
-                if (src.startsWith("../")) src="http://www.chexie.net/bbs"+src.substring(2);
-
-                menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_IMAGE + imgNum, Constants.CONTEXT_MENU_BBS_IMAGE + imgNum,
-                        "Õº∆¨£∫"+src);
-
-                imgNum++;
-
-            }
-*/
             imgNum=0;
             for (String src: postInfo.imgs) {
-                menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_IMAGE + imgNum, Constants.CONTEXT_MENU_BBS_IMAGE + imgNum,
-                        "Õº∆¨£∫"+src);
+                menu.add(Menu.NONE, Constants.CONTEXT_MENU_BBS_IMAGE + imgNum, Constants.CONTEXT_MENU_BBS_IMAGE + imgNum, "ÂõæÁâá:"+src);
                 imgNum++;
             }
-
         }
     }
 
@@ -384,45 +337,64 @@ public class ViewActivity extends BaseActivity {
     public boolean onContextItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id==Constants.CONTEXT_MENU_BBS_POST_LZL) {
+            // Êú™ÁôªÂΩïÊó∂ÊèêÁ§∫Âπ∂ÈòªÊ≠¢ËøõÂÖ•Ê•º‰∏≠Ê•ºÂõûÂ§ç
+            if (!Userinfo.requireLogin(this)) {
+                return true;
+            }
             PostInfo postInfo=viewPost.postInfos.get(viewPost.index);
             Intent intent=new Intent(this, LZLActivity.class);
             intent.putExtra("fid", postInfo.fid);
+            intent.putExtra("bid", board);
+            intent.putExtra("tid", threadid);
             intent.putExtra("add",true);
             startActivityForResult(intent,4);
             return true;
         }
 
-        if (id == Constants.CONTEXT_MENU_BBS_POST
-                && showingPage == PAGE_POST) {
-            PostInfo postInfo = viewPost.postInfos.get(viewPost.index);
-            Intent intent = new Intent(this, PostActivity.class);
-            intent.putExtra("type", "reply");
-            intent.putExtra("bid", board);
-            intent.putExtra("tid", threadid);
-            intent.putExtra("title", viewPost.title);
-            String quote=Html.fromHtml(postInfo.content).toString();
-            if (quote.length()>100) quote=quote.substring(0,95)+"...";
-            intent.putExtra("quote","[quote="+postInfo.author+"]"+quote+"[/quote]");
-            startActivityForResult(intent, PAGE_POST);
-            return true;
-        }
+        // Â∑≤ÁßªÈô§ÊôÆÈÄö‚ÄúÂõûÂ§ç‚ÄùÂäüËÉΩÔºå‰øùÁïô‚ÄúÂõûÂ§çÊ•º‰∏≠Ê•º‚Äù‰Ωú‰∏∫ÂõûÂ§çÂÖ•Âè£
         if (id == Constants.CONTEXT_MENU_BBS_EDIT) {
             PostInfo postInfo = viewPost.postInfos.get(viewPost.index);
+            // ÈúÄË¶ÅÁôªÂΩï‰∏î‰∏∫Êú¨‰∫∫ÂèëÂ∏É
+            if (!Userinfo.requireLogin(this)) return true;
+            if (!Userinfo.isOwner(postInfo.author)) {
+                CustomToast.showInfoToast(this, "Âè™ËÉΩÁºñËæëËá™Â∑±ÁöÑÊ•ºÂ±Ç");
+                return true;
+            }
             Intent intent = new Intent(this, PostActivity.class);
             intent.putExtra("type", "edit");
             intent.putExtra("bid", board);
             intent.putExtra("tid", threadid);
             intent.putExtra("pid",postInfo.pid+"");
             intent.putExtra("title", viewPost.title);
-            intent.putExtra("text", Html.fromHtml(postInfo.content).toString());
+            intent.putExtra("text", Util.fromHtml(postInfo.content).toString());
             startActivityForResult(intent, 3);
+            return true;
+        }
+
+        if (id == Constants.CONTEXT_MENU_BBS_DELETE) {
+            PostInfo postInfo = viewPost.postInfos.get(viewPost.index);
+            // ÈúÄË¶ÅÁôªÂΩï‰∏î‰∏∫Êú¨‰∫∫ÂèëÂ∏É
+            if (!Userinfo.requireLogin(this)) return true;
+            if (!Userinfo.isOwner(postInfo.author)) {
+                CustomToast.showInfoToast(this, "Âè™ËÉΩÂà†Èô§Ëá™Â∑±ÁöÑÊ•ºÂ±Ç");
+                return true;
+            }
+            // Á°ÆËÆ§Âà†Èô§
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Âà†Èô§Á°ÆËÆ§")
+                    .setMessage("Á°ÆÂÆöË¶ÅÂà†Èô§ËØ•Ê•ºÂ±ÇÂêóÔºü")
+                    .setPositiveButton("Á°ÆÂÆö", (dialog, which) -> {
+                        // ÂèëÈÄÅÂà†Èô§ËØ∑Ê±ÇÔºåÁ≠âÂæÖÊúçÂä°Âô®Á°ÆËÆ§ÂêéÂú®Êú¨Âú∞Êõ¥Êñ∞ÂàóË°®
+                        viewPost.requestDelete(postInfo.pid, postInfo.fid, board, threadid);
+                    })
+                    .setNegativeButton("ÂèñÊ∂à", null)
+                    .show();
             return true;
         }
         if (id >= Constants.CONTEXT_MENU_BBS_URL && id < Constants.CONTEXT_MENU_BBS_URL + urlNum) {
             String url = item.getTitle().toString();
-
             Pattern pattern=Pattern.compile("([\\u4e00-\\u9fa5]+)(\\d+)?");
-            Matcher matcher=pattern.matcher(url.replace("¡¥Ω”£∫","").replace("Ã˚","").replace("∞Ê",""));
+            Matcher matcher=pattern.matcher(url.replace("ÊâìÂºÄ:","").replace("ÊùøÂùó","").replace("Â∏ñ",""));
             if (matcher.find()) {
                 String text=matcher.group(1);
                 String tid=matcher.group(2);
@@ -433,8 +405,7 @@ public class ViewActivity extends BaseActivity {
                     if (tid!=null && !"".equals(tid)) {
                         intent.putExtra("type", "thread");
                         intent.putExtra("tid",tid);
-                    }
-                    else intent.putExtra("type","board");
+                    } else intent.putExtra("type","board");
                     startActivity(intent);
                     return true;
                 }
@@ -446,7 +417,7 @@ public class ViewActivity extends BaseActivity {
             return true;
         }
         if (id>=Constants.CONTEXT_MENU_BBS_IMAGE && id<=Constants.CONTEXT_MENU_BBS_IMAGE+imgNum) {
-            String url = item.getTitle().toString().replace("Õº∆¨£∫","");
+            String url = item.getTitle().toString().replace("ÂõæÁâá:","");
             ImageRequest.showImage(this, url);
             return true;
         }
@@ -465,13 +436,10 @@ public class ViewActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) return;
-        if (requestCode == PAGE_THREAD) {
-            viewThread.getThreads(1);
-        } else if (requestCode == PAGE_POST) {
-            viewPost.getPosts(threadid, viewPost.totalPage);
-        } else if (requestCode == 3) {
-            viewPost.getPosts(threadid, viewPost.page);
-        } else if (requestCode == 4 && showingPage==PAGE_POST) {
+        if (requestCode == PAGE_THREAD) viewThread.getThreads(1);
+        else if (requestCode == PAGE_POST) viewPost.getPosts(threadid, viewPost.totalPage);
+        else if (requestCode == 3) viewPost.getPosts(threadid, viewPost.page);
+        else if (requestCode == 4 && showingPage==PAGE_POST) {
             int lzlnum=data.getIntExtra("lzl",-1);
             if (lzlnum!=-1) {
                 viewPost.postInfos.get(viewPost.index).lzl=lzlnum;

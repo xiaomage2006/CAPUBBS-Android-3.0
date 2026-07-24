@@ -2,6 +2,7 @@ package com.capubbs.lib;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -68,7 +69,7 @@ public class MyBitmapFactory {
                 }
                 outofmemory = false;
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("MyBitmapFactory", "getCompressedBitmap error", e);
                 bitmap = null;
                 outofmemory = false;
             } catch (OutOfMemoryError err) {
@@ -111,7 +112,7 @@ public class MyBitmapFactory {
         try {
             output.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("MyBitmapFactory", "close error", e);
         }
         return result;
     }
@@ -125,11 +126,9 @@ public class MyBitmapFactory {
     }
 
     public static boolean bitmapToFile(File file, Bitmap bitmap, double size, boolean ispng) {
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             byte[] bts = bitmapToArray(bitmap, size, ispng);
             fileOutputStream.write(bts);
-            fileOutputStream.close();
             return true;
         } catch (Exception e) {
             return false;
@@ -138,7 +137,7 @@ public class MyBitmapFactory {
 
     public static String decodeQRCode(Bitmap bitmap) {
         try {
-            Map<DecodeHintType, Object> hints = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
+            Map<DecodeHintType, Object> hints = new EnumMap<>(DecodeHintType.class);
             Collection<BarcodeFormat> decodeFormats = EnumSet.noneOf(BarcodeFormat.class);
             decodeFormats.addAll(EnumSet.of(BarcodeFormat.QR_CODE));
             hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
@@ -166,7 +165,7 @@ public class MyBitmapFactory {
             string = string.trim();
             if ("".equals(string))
                 return null;
-            Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
+            Hashtable<EncodeHintType, String> hints = new Hashtable<>();
             hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
             BitMatrix bitMatrix = new QRCodeWriter().encode(string, BarcodeFormat.QR_CODE, width, height, hints);
             int[] pixels = new int[width * height];

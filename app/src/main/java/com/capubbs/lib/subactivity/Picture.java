@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Environment;
@@ -43,9 +42,9 @@ public class Picture {
     public Picture showPicture(String url) {
         File file = MyFile.getCache(subActivity, Util.getHash(url));
         if (MyFile.urlToFile(url, file)) {
-            return showPicture(file.getAbsolutePath(), "≤Èø¥Õº∆¨");
+            return showPicture(file.getAbsolutePath(), "Êü•ÁúãÂõæÁâá");
         } else {
-            CustomToast.showErrorToast(subActivity, "Õº∆¨º”‘ÿ ß∞‹");
+            CustomToast.showErrorToast(subActivity, "ÂõæÁâáÂä†ËΩΩÂ§±Ë¥•");
             subActivity.wantToExit();
             return this;
         }
@@ -56,14 +55,11 @@ public class Picture {
         this.filepath = filepath;
         bitmap = MyBitmapFactory.getCompressedBitmap(filepath, -1);
         touchImageView.setImageBitmap(bitmap);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (bitmap != null) {
-                    subActivity.handler.sendMessage(Message.obtain(subActivity.handler,
-                            Constants.MESSAGE_SUBACTIVITY_DECODE_PICTURE,
-                            MyBitmapFactory.decodeQRCode(bitmap)));
-                }
+        new Thread(() -> {
+            if (bitmap != null) {
+                subActivity.handler.sendMessage(Message.obtain(subActivity.handler,
+                        Constants.MESSAGE_SUBACTIVITY_DECODE_PICTURE,
+                        MyBitmapFactory.decodeQRCode(bitmap)));
             }
         }).start();
         return this;
@@ -76,7 +72,7 @@ public class Picture {
                 || title.endsWith(".png") || title.endsWith(".gif")) {
             title = title.substring(0, title.lastIndexOf("."));
         }
-        if ("".equals(title)) title = "≤Èø¥Õº∆¨";
+        if ("".equals(title)) title = "Êü•ÁúãÂõæÁâá";
         subActivity.setTitle(title);
         subActivity.setContentView(R.layout.subactivity_imageview);
         touchImageView = (TouchImageView) subActivity.findViewById(R.id.subactivity_imageview);
@@ -87,26 +83,27 @@ public class Picture {
 
     public void savePicture() throws Exception {
         if (this.filepath == null || "".equals(this.filepath)) {
-            CustomToast.showErrorToast(subActivity, "∏√Õº∆¨Œﬁ∑®±£¥ÊµΩ±æµÿ");
+            CustomToast.showErrorToast(subActivity, "ÂõæÁâáÊó†Ê≥ï‰øùÂ≠òÂà∞Êú¨Âú∞");
             return;
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss", Locale.getDefault());
         String time = simpleDateFormat.format(new Date());
-        new File(Environment.getExternalStorageDirectory() + "/Pictures/capubbs/").mkdirs();
-        String t = new String(title);
+        File pictureDir = subActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File capubbsDir = new File(pictureDir, "capubbs");
+        capubbsDir.mkdirs();
+        String t = title;
         if (t.length() >= 15) t = t.substring(0, 13) + "...";
-        String filepath = Environment.getExternalStorageDirectory() + "/Pictures/capubbs/"
-                + t + "__" + time + ".png";
+        String filepath = new File(capubbsDir, t + "__" + time + ".png").getAbsolutePath();
         if (MyFile.copyFile(this.filepath, filepath)) {
             if (android.os.Build.VERSION.SDK_INT < 16)
-                CustomToast.showSuccessToast(subActivity, "Õº∆¨±£¥Ê‘⁄\n" + filepath, 3500);
+                CustomToast.showSuccessToast(subActivity, "ÂõæÁâáÂ∑≤‰øùÂ≠ò\n" + filepath, 3500);
             else {
-                MyNotification.sendNotificationToOpenfile("Õº∆¨“—±£¥Ê",
-                        "Õº∆¨±£¥Ê‘⁄" + filepath, "Õº∆¨±£¥Ê‘⁄" + filepath, subActivity,
+                MyNotification.sendNotificationToOpenfile("ÂõæÁâáÂ∑≤‰øùÂ≠ò",
+                        "ÂõæÁâáÂ∑≤‰øùÂ≠ò" + filepath, "ÂõæÁâáÂ∑≤‰øùÂ≠ò" + filepath, subActivity,
                         new File(filepath));
             }
         } else
-            CustomToast.showErrorToast(subActivity, "±£¥Ê ß∞‹");
+            CustomToast.showErrorToast(subActivity, "‰øùÂ≠òÂ§±Ë¥•");
 		/*
 		try {
 			Bitmap bitmap=((BitmapDrawable)drawable).getBitmap();
@@ -114,7 +111,7 @@ public class Picture {
 			bitmap.compress(CompressFormat.PNG, 100, fileOutputStream);
 			fileOutputStream.flush();
 			fileOutputStream.close();
-			CustomToast.showSuccessToast(subActivity, "Õº∆¨±£¥Ê‘⁄ "+filepath);
+			CustomToast.showSuccessToast(subActivity, "Õº∆¨ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ "+filepath);
 		}
 		catch (Exception e) {e.printStackTrace();}
 		*/
@@ -122,11 +119,11 @@ public class Picture {
 
     public void sharePicture() {
         if (bitmap == null) {
-            CustomToast.showErrorToast(subActivity, "¥ÀÕº∆¨≤ªø…±ª∑÷œÌ");
+            CustomToast.showErrorToast(subActivity, "ÂõæÁâáÊó†Ê≥ïË¢´ÂàÜ‰∫´");
             return;
         }
-        Share.readyToShareImage(subActivity, "∑÷œÌÕº∆¨", bitmap);
-        //CustomToast.showInfoToast(subActivity,"∑÷œÌπ¶ƒ‹‘› ±ªπŒ¥…œœﬂ£°");
+        Share.readyToShareImage(subActivity, "ÂàÜ‰∫´ÂõæÁâá", bitmap);
+        //CustomToast.showInfoToast(subActivity,"ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ±ÔøΩÔøΩŒ¥ÔøΩÔøΩÔøΩﬂ£ÔøΩ");
     }
 
     public void decodePicture(final String string) {
@@ -134,10 +131,10 @@ public class Picture {
         if (string.startsWith("http://")
                 || string.startsWith("https://")) {
             if (string.startsWith("http://weixin.qq.com/")) {
-                new AlertDialog.Builder(subActivity).setTitle("Ã· æ")
-                        .setMessage("Œ¢–≈”√ªß∫ÕŒ¢–≈»∫µƒ∂˛Œ¨¬ÎŒﬁ∑®’˝»∑ ∂±£¨"
-                                + "«Î∑÷œÌµΩŒ¢–≈∫Û‘Ÿ”√Œ¢–≈Ω¯–– ∂±°£")
-                        .setPositiveButton("»∑∂®", null).show();
+                new AlertDialog.Builder(subActivity).setTitle("ÊèêÁ§∫")
+                        .setMessage("ÂæÆ‰ø°Áî®Êà∑ÊàñÂæÆ‰ø°Áæ§ÁöÑ‰∫åÁª¥Á†ÅÊó†Ê≥ïË¢´Ê≠£Á°ÆËØÜÂà´Ôºå"
+                                + "ËØ∑‰ΩøÁî®ÂæÆ‰ø°ÂÆ¢Êà∑Á´ØÊâ´ÊèèÂæÆ‰ø°‰∫åÁª¥Á†Å")
+                        .setPositiveButton("Á°ÆÂÆö", null).show();
                 return;
             }
             Intent intent = new Intent(subActivity, SubActivity.class);
@@ -146,14 +143,12 @@ public class Picture {
             intent.putExtra("title", title);
             subActivity.startActivity(intent);
         } else {
-            new AlertDialog.Builder(subActivity).setTitle(" ∂±∂˛Œ¨¬Î")
-                    .setMessage(string).setPositiveButton("»∑∂®", null).
-                    setNegativeButton("∏¥÷∆", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            ClipboardManager clipboardManager = (ClipboardManager) subActivity.getSystemService(Context.CLIPBOARD_SERVICE);
-                            clipboardManager.setPrimaryClip(ClipData.newPlainText("text", string));
-                            CustomToast.showSuccessToast(subActivity, "“—∏¥÷∆µΩºÙ«–∞Â£°", 1500);
-                        }
+            new AlertDialog.Builder(subActivity).setTitle("ËØÜÂà´‰∫åÁª¥Á†Å")
+                    .setMessage(string).setPositiveButton("Á°ÆÂÆö", null).
+                    setNegativeButton("Â§çÂà∂", (dialog, which) -> {
+                        ClipboardManager clipboardManager = (ClipboardManager) subActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+                        clipboardManager.setPrimaryClip(ClipData.newPlainText("text", string));
+                        CustomToast.showSuccessToast(subActivity, "Â∑≤Â§çÂà∂Âà∞Ââ™Ë¥¥ÊùøÔºÅ", 1500);
                     }).show();
         }
     }

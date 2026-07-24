@@ -25,37 +25,37 @@ public class XML2Json {
             return string;
         }
         catch (Exception e) {
-            e.printStackTrace();
+            Log.e("XML2Json", "toJson error", e);
         }
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("code", 20);
-            jsonObject.put("msg", "XML解析失败，请联系管理员以获取帮助。");
+            jsonObject.put("msg", "XML");
             JSONArray jsonArray=new JSONArray();
             jsonArray.put(jsonObject);
             return jsonArray.toString();
         }
-        catch (Exception e) {e.printStackTrace();}
+        catch (Exception e) {Log.e("XML2Json", "fallback error", e);}
         return "";
     }
 
     public static String getErrorMessage(int code) {
         switch (code) {
-            case -25:return "超时，请重新登录 (errorcode: -1)";
-            case 1:return "密码错误 (errorcode: 1)";
-            case 2:return "用户不存在 (errorcode: 2)";
-            case 3:return "您已被封禁 (errorcode: 3)";
-            case 4:return "两次发表时间差不能少于15s (errorcode: 4)";
-            case 5:return "文章已被锁定 (errorcode: 5)";
-            case 6:return "内部错误 (errorcode: 6)";
-            case 7:return "只能编辑自己的帖子 (errorcode: 7)";
-            case 8:return "用户名有非法字符 (errorcode: 8)";
-            case 9:return "用户名已存在 (errorcode: 9)";
-            case 10:return "权限不够 (errorcode: 10)";
-            case 11:return "请直接删除主题 (errorcode: 11)";
+            case -25:return " (errorcode: -1)";
+            case 1:return "(errorcode: 1)";
+            case 2:return "(errorcode: 2)";
+            case 3:return "(errorcode: 3)";
+            case 4:return "15s (errorcode: 4)";
+            case 5:return "(errorcode: 5)";
+            case 6:return "(errorcode: 6)";
+            case 7:return "只(errorcode: 7)";
+            case 8:return "(errorcode: 8)";
+            case 9:return "(errorcode: 9)";
+            case 10:return "(errorcode: 10)";
+            case 11:return "(errorcode: 11)";
             default:break;
         }
-        return "发生内部错误 (errorcode: "+code+")；请联系管理员获取帮助。";
+        return "(errorcode: "+code+")";
     }
 
 

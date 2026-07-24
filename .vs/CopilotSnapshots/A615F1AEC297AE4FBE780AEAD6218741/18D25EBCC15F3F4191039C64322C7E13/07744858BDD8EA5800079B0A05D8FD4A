@@ -1,0 +1,244 @@
+﻿package com.capubbs.lib;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Picture;
+import android.graphics.drawable.BitmapDrawable;
+import android.webkit.WebView;
+
+import java.security.MessageDigest;
+import java.util.Random;
+
+public class Util {
+
+    @SuppressWarnings("deprecation")
+    public static Bitmap captureWebView(WebView webView) {
+        if (webView == null) return null;
+        Picture snapShot = webView.capturePicture();
+        Bitmap bmp = Bitmap.createBitmap(snapShot.getWidth(), snapShot.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap bg=null;
+        try {
+            Bitmap bgr = ((BitmapDrawable) webView.getBackground()).getBitmap();
+            bg=Bitmap.createScaledBitmap(bgr, snapShot.getWidth(), snapShot.getHeight(), true);
+        }
+        catch (Exception | OutOfMemoryError e) {bg=null;}
+        Canvas canvas = new Canvas(bmp);
+        if (bg!=null)
+            canvas.drawBitmap(bg,0,0,new Paint());
+        snapShot.draw(canvas);
+        return bmp;
+    }
+
+    public static String getHash(String string) {
+        return getHash(string, "");
+    }
+
+    public static String getHash(String string, String defaultString) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            return bytes2Hex(md.digest(string.getBytes()));
+        } catch (Exception e) {
+            return defaultString;
+        }
+    }
+
+    public static String md5(String string) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            return bytes2Hex(md.digest(string.getBytes()));
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private static String bytes2Hex(byte[] bts) {
+        String des = "";
+        for (int i = 0; i < bts.length; i++) {
+            String tmp = (Integer.toHexString(bts[i] & 0xFF));
+            if (tmp.length() == 1)
+                des += "0";
+            des += tmp;
+        }
+        return des;
+    }
+
+    public static int sp2px(Context context, int sp) {
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+        return (int) (sp * fontScale + 0.5f);
+    }
+
+    public static int px2sp(Context context, int px) {
+        final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+        return (int) (px / fontScale + 0.5f);
+    }
+
+    public static int generateColorInt() {
+        return Color.parseColor(generateColorString());
+    }
+
+    public static String generateColorString() {
+        Random random = new Random();
+        int[] x = new int[6];
+        while (true) {
+            for (int i=0;i<6;i++)
+                x[i]=random.nextInt(16);
+            int val=x[0]+x[2]+x[4];
+            if (val>=27 && val<=40) break;
+        }
+        String string = "#";
+        for (int i = 0; i < 6; i++)
+            string += intToHex(x[i]);
+        return string;
+    }
+
+    private static String intToHex(int i) {
+        if (i <= 9) return i + "";
+        if (i == 10) return "a";
+        if (i == 11) return "b";
+        if (i == 12) return "c";
+        if (i == 13) return "d";
+        if (i == 14) return "e";
+        return "f";
+    }
+
+    public static String getValue(String url, String name) {
+        int pos=url.lastIndexOf("?");
+        int anchor=url.lastIndexOf("#");
+        if (pos<0) return "";
+        String string;
+        if (anchor<=pos+1)
+            string=url.substring(pos+1);
+        else string=url.substring(pos+1, anchor-pos-1);
+        if ("".equals(string)) return "";
+        String[] strings=string.split("&");
+        for (String str: strings) {
+            String[] para=str.split("=");
+            if (name.equals(para[0].trim()))
+                return para[1].trim();
+        }
+        return "";
+    }
+
+    public static String cleanHtmlContent(String html) {
+        if (html == null || html.isEmpty()) return "";
+        
+        String cleaned = html;
+        
+        cleaned = cleaned.replaceAll("\\r\\n", "\n");
+        cleaned = cleaned.replaceAll("\\r", "\n");
+        
+        cleaned = cleaned.replaceAll("<p\\s*/?>", "<br><br>");
+        cleaned = cleaned.replaceAll("</p>", "<br><br>");
+        cleaned = cleaned.replaceAll("<div\\s*/?>", "<br>");
+        cleaned = cleaned.replaceAll("</div>", "<br>");
+        cleaned = cleaned.replaceAll("<tr\\s*/?>", "<br>");
+        cleaned = cleaned.replaceAll("</tr>", "<br>");
+        cleaned = cleaned.replaceAll("<td\\s*/?>", " ");
+        cleaned = cleaned.replaceAll("</td>", " ");
+        cleaned = cleaned.replaceAll("<th\\s*/?>", " ");
+        cleaned = cleaned.replaceAll("</th>", " ");
+        cleaned = cleaned.replaceAll("<li\\s*/?>", "<br>• ");
+        cleaned = cleaned.replaceAll("</li>", "");
+        cleaned = cleaned.replaceAll("<ul\\s*/?>", "<br>");
+        cleaned = cleaned.replaceAll("</ul>", "<br>");
+        cleaned = cleaned.replaceAll("<ol\\s*/?>", "<br>");
+        cleaned = cleaned.replaceAll("</ol>", "<br>");
+        cleaned = cleaned.replaceAll("<hr\\s*/?>", "<br><br>");
+        
+        String[] lines = cleaned.split("\n");
+        StringBuilder sb = new StringBuilder();
+        
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.isEmpty()) {
+                if (sb.length() > 0 && !sb.toString().endsWith("<br><br>") && !sb.toString().endsWith("<br>")) {
+                    sb.append("<br>");
+                }
+                continue;
+            }
+            if (!line.startsWith("<") && i > 0 && !lines[i-1].trim().isEmpty() && !lines[i-1].trim().endsWith("<br>")) {
+                if (!sb.toString().endsWith("<br>")) {
+                    sb.append(" ");
+                }
+            }
+            sb.append(line);
+        }
+        
+        cleaned = sb.toString();
+        
+        cleaned = cleaned.replaceAll("(\\s*<br\\s*/?>\\s*)+", "<br>");
+        cleaned = cleaned.replaceAll("<br>\\s*<br>", "<br><br>");
+        while (cleaned.contains("<br><br><br>")) {
+            cleaned = cleaned.replace("<br><br><br>", "<br><br>");
+        }
+        
+        cleaned = cleaned.replaceAll("(?<!<br>)\\s{2,}(?!<br>)", " ");
+        
+        cleaned = cleaned.replaceAll("^<br\\s*/?>", "");
+        cleaned = cleaned.replaceAll("<br\\s*/?>$", "");
+        
+        return cleaned.trim();
+    }
+
+    public static String prepareHtmlContent(String html) {
+        if (html == null || html.isEmpty()) return "";
+        
+        String prepared = html;
+        
+        prepared = prepared.replaceAll("<script[^>]*>[\\s\\S]*?</script>", "");
+        prepared = prepared.replaceAll("<link[^>]*>", "");
+        prepared = prepared.replaceAll("<meta[^>]*>", "");
+        prepared = prepared.replaceAll("<head[^>]*>[\\s\\S]*?</head>", "");
+        prepared = prepared.replaceAll("<title[^>]*>[\\s\\S]*?</title>", "");
+        prepared = prepared.replaceAll("<html[^>]*>", "");
+        prepared = prepared.replaceAll("</html>", "");
+        prepared = prepared.replaceAll("<body[^>]*>", "");
+        prepared = prepared.replaceAll("</body>", "");
+        prepared = prepared.replaceAll("<!DOCTYPE[^>]*>", "");
+        
+        prepared = prepared.replaceAll("href=\"/bbs", "href=\"http://www.chexie.net/bbs");
+        prepared = prepared.replaceAll("href='/bbs", "href='http://www.chexie.net/bbs");
+        prepared = prepared.replaceAll("src=\"/bbs", "src=\"http://www.chexie.net/bbs");
+        prepared = prepared.replaceAll("src='/bbs", "src='http://www.chexie.net/bbs");
+        prepared = prepared.replaceAll("href=\"/", "href=\"http://www.chexie.net/");
+        prepared = prepared.replaceAll("href='/", "href='http://www.chexie.net/");
+        prepared = prepared.replaceAll("src=\"/", "src=\"http://www.chexie.net/");
+        prepared = prepared.replaceAll("src='/", "src='http://www.chexie.net/");
+        prepared = prepared.replaceAll("href=\"../", "href=\"http://www.chexie.net/bbs/");
+        prepared = prepared.replaceAll("href='../", "href='http://www.chexie.net/bbs/");
+        prepared = prepared.replaceAll("src=\"../", "src=\"http://www.chexie.net/bbs/");
+        prepared = prepared.replaceAll("src='../", "src='http://www.chexie.net/bbs/");
+        
+        String css = "<style>" +
+                "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333; padding: 0; margin: 0; word-wrap: break-word; }" +
+                "p { margin: 0 0 10px 0; }" +
+                "br { line-height: 1.5; }" +
+                "a { color: #1a73e8; text-decoration: none; }" +
+                "a:hover { text-decoration: underline; }" +
+                "img { max-width: 100%; height: auto; display: block; margin: 5px 0; }" +
+                "blockquote { border-left: 4px solid #ddd; padding-left: 12px; margin: 10px 0; color: #666; background: #f9f9f9; padding: 10px 15px; }" +
+                "code { font-family: monospace; background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 14px; }" +
+                "pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; font-family: monospace; font-size: 14px; }" +
+                "table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }" +
+                "th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }" +
+                "th { background: #f5f5f5; }" +
+                "ul, ol { margin: 10px 0; padding-left: 25px; }" +
+                "li { margin: 5px 0; }" +
+                "strong, b { font-weight: 600; }" +
+                "em, i { font-style: italic; }" +
+                "h1, h2, h3, h4, h5, h6 { margin: 15px 0 10px 0; font-weight: 600; }" +
+                "h1 { font-size: 24px; }" +
+                "h2 { font-size: 20px; }" +
+                "h3 { font-size: 18px; }" +
+                "h4, h5, h6 { font-size: 16px; }" +
+                ".quote { border-left: 4px solid #1a73e8; padding-left: 12px; margin: 10px 0; color: #555; background: #f0f7ff; padding: 10px 15px; }" +
+                ".card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 15px; margin: 10px 0; }" +
+                "</style>";
+        
+        return css + "<div style='padding: 5px;'>" + prepared + "</div>";
+    }
+
+}

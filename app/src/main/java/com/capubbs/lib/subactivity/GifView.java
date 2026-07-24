@@ -30,7 +30,7 @@ public class GifView {
         title = _title;
         title = title.trim();
         if (title.endsWith(".gif")) title = title.substring(0, title.lastIndexOf("."));
-        if ("".equals(title)) title = "≤Èø¥Õº∆¨";
+        if ("".equals(title)) title = "Êü•ÁúãÂõæÁâá";
         subActivity.setTitle(title);
         subActivity.setContentView(R.layout.subactivity_gifview);
         gifImageView = (GifImageView) subActivity.findViewById(R.id.subactivity_gifview);
@@ -53,24 +53,25 @@ public class GifView {
 
     public void savePicture() throws Exception {
         if (this.filepath == null || "".equals(this.filepath)) {
-            CustomToast.showErrorToast(subActivity, "∏√Õº∆¨Œﬁ∑®±£¥ÊµΩ±æµÿ");
+            CustomToast.showErrorToast(subActivity, "ÂõæÁâáÊó†Ê≥ï‰øùÂ≠òÂà∞Êú¨Âú∞");
             return;
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss", Locale.getDefault());
         String time = simpleDateFormat.format(new Date());
-        new File(Environment.getExternalStorageDirectory() + "/Pictures/capubbs/").mkdirs();
-        String filepath = Environment.getExternalStorageDirectory() + "/Pictures/capubbs/"
-                + title + "__" + time + ".gif";
+        File pictureDir = subActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File capubbsDir = new File(pictureDir, "capubbs");
+        capubbsDir.mkdirs();
+        String filepath = new File(capubbsDir, title + "__" + time + ".gif").getAbsolutePath();
         if (MyFile.copyFile(this.filepath, filepath)) {
             if (android.os.Build.VERSION.SDK_INT < 16)
-                CustomToast.showSuccessToast(subActivity, "Õº∆¨±£¥Ê‘⁄\n" + filepath, 3500);
+                CustomToast.showSuccessToast(subActivity, "ÂõæÁâáÂ∑≤‰øùÂ≠ò\n" + filepath, 3500);
             else {
-                MyNotification.sendNotificationToOpenfile("Õº∆¨“—±£¥Ê",
-                        "Õº∆¨±£¥Ê‘⁄" + filepath, "Õº∆¨±£¥Ê‘⁄" + filepath, subActivity,
+                MyNotification.sendNotificationToOpenfile("ÂõæÁâáÂ∑≤‰øùÂ≠ò",
+                        "ÂõæÁâáÂ∑≤‰øùÂ≠ò" + filepath, "ÂõæÁâáÂ∑≤‰øùÂ≠ò" + filepath, subActivity,
                         new File(filepath));
             }
         } else
-            CustomToast.showErrorToast(subActivity, "±£¥Ê ß∞‹");
+            CustomToast.showErrorToast(subActivity, "‰øùÂ≠òÂ§±Ë¥•");
     }
     public void stop() {
         try {

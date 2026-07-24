@@ -1,23 +1,19 @@
 package com.capubbs;
 
 import android.content.Intent;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import androidx.fragment.app.Fragment;
 
-/**
- * Created by oc on 2016/10/14.
- */
+import java.util.ArrayList;
+
 public class AllBoardsFragment extends Fragment {
-    public static ArrayList<HashMap<String, String>> showList = new ArrayList<HashMap<String, String>>();
+    public static ArrayList<String> showList = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

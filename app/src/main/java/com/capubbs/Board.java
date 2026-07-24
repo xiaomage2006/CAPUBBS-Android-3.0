@@ -2,7 +2,6 @@ package com.capubbs;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,19 +12,19 @@ public class Board {
     String board, name, category;
     boolean anonymous;
     int total;
-    public static HashMap<String, Board> boards = new HashMap<String, Board>();
+    public static HashMap<String, Board> boards = new HashMap<>();
 
     public static void load() {
         boards.clear();
-        boards.put("1",new Board("1","³µĞ­¹¤×÷Çø"));
-        boards.put("2",new Board("2","ĞĞÕß×ãÒô"));
-        boards.put("3",new Board("3","³µÓÑ±¦µä"));
-        boards.put("4",new Board("4","´¿¾»Ë®"));
-        boards.put("5",new Board("5","¿¼²ìÓëÉç»á"));
-        boards.put("6",new Board("6","ÎåºşËÄº£"));
-        boards.put("7",new Board("7","Ò»¼¼Ö®³¤"));
-        boards.put("9",new Board("9","¾ºÈü¾º¼¼"));
-        boards.put("28",new Board("28","ÍøÕ¾Î¬»¤"));
+        boards.put("1",new Board("1","è½¦åå·¥ä½œåŒº"));
+        boards.put("2",new Board("2","è¡Œè€…è¶³éŸ³"));
+        boards.put("3",new Board("3","è½¦å‹å®å…¸"));
+        boards.put("4",new Board("4","çº¯å‡€æ°´"));
+        boards.put("5",new Board("5","è€ƒå¯Ÿä¸ç¤¾ä¼š"));
+        boards.put("6",new Board("6","äº”æ¹–å››æµ·"));
+        boards.put("7",new Board("7","ä¸€æŠ€ä¹‹é•¿"));
+        boards.put("9",new Board("9","ç«èµ›ç«æŠ€"));
+        boards.put("28",new Board("28","ç½‘ç«™ç»´æŠ¤"));
     }
 
     public static ArrayList<String> getNames() {
@@ -49,7 +48,7 @@ public class Board {
     public static String getNameById(String id) {
         if (boards.isEmpty()) load();
         if (boards.containsKey(id)) return boards.get(id).name;
-        else return "Î´Öª°æÃæ";
+        else return "æœªçŸ¥æ¿å—";
     }
 
     public static boolean containBoard(String id) {
@@ -60,9 +59,9 @@ public class Board {
     public Board(String _board, String _name) {this(_board,_name,"",0,0);}
     public Board(String _board, String _name, String _category, int _anonymous,
                  int total) {
-        board = new String(_board);
-        name = new String(_name);
-        category = new String(_category);
+        board = _board;
+        name = _name;
+        category = _category;
         anonymous = _anonymous == 1;
         this.total = total;
     }

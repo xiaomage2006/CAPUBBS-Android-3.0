@@ -5,14 +5,15 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.capubbs.lib.BaseActivity;
 import com.capubbs.lib.Constants;
@@ -42,7 +43,7 @@ public class BBSActivity extends BaseActivity {
         MyFile.setUseSDCard(true, this);
 
         mViewPager = (CustomViewPager) findViewById(R.id.bbspager);
-        mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+        mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
             @Override
             public int getCount() {
                 return 4;
@@ -59,7 +60,7 @@ public class BBSActivity extends BaseActivity {
                 return Fragment.instantiate(BBSActivity.this, "com.capubbs.TopFragment");
             }
         });
-        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 if (position == 0) clickTop(null);
@@ -93,7 +94,7 @@ public class BBSActivity extends BaseActivity {
         ((ImageView) findViewById(R.id.bbs_bottom_img_top)).getDrawable().
                 setColorFilter(Color.parseColor("#2d90dc"), PorterDuff.Mode.MULTIPLY);
         ((TextView) findViewById(R.id.bbs_bottom_top)).setTextColor(Color.parseColor("#2d90dc"));
-        setTitle("◊ÓΩ¸»»µ„");
+        setTitle("ÊúÄÊñ∞Â∏ñÂ≠ê");
     }
 
     public void clickAllBoards(View view) {
@@ -102,7 +103,7 @@ public class BBSActivity extends BaseActivity {
         resetAllTab();
         ((ImageView) findViewById(R.id.bbs_bottom_img_allboards)).getDrawable().setColorFilter(Color.parseColor("#2d90dc"), PorterDuff.Mode.MULTIPLY);
         ((TextView) findViewById(R.id.bbs_bottom_allboards)).setTextColor(Color.parseColor("#2d90dc"));
-        setTitle("∞Ê√Ê¡–±Ì");
+        setTitle("ÊùøÂùóÂàóË°®");
     }
 
     public void clickSearch(View view) {
@@ -111,7 +112,7 @@ public class BBSActivity extends BaseActivity {
         resetAllTab();
         ((ImageView) findViewById(R.id.bbs_bottom_img_search)).getDrawable().setColorFilter(Color.parseColor("#2d90dc"), PorterDuff.Mode.MULTIPLY);
         ((TextView) findViewById(R.id.bbs_bottom_search)).setTextColor(Color.parseColor("#2d90dc"));
-        setTitle("À—À˜Ã˚◊”");
+        setTitle("Á´ôÂÜÖÊêúÁ¥¢");
     }
 
     public void clickMe(View view) {
@@ -120,7 +121,7 @@ public class BBSActivity extends BaseActivity {
         resetAllTab();
         ((ImageView) findViewById(R.id.bbs_bottom_img_settings)).getDrawable().setColorFilter(Color.parseColor("#2d90dc"), PorterDuff.Mode.MULTIPLY);
         ((TextView) findViewById(R.id.bbs_bottom_settings)).setTextColor(Color.parseColor("#2d90dc"));
-        setTitle("…Ë÷√");
+        setTitle("ÊàëÁöÑ");
     }
 
     @Override
