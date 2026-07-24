@@ -1,14 +1,16 @@
 # CAPUBBS-Android-3.0 项目记忆
 
 ## 项目概况
-- 北大车协 BBS Android 客户端，纯 Java 项目
+- 北大车协 BBS Android 客户端，Java + Kotlin 混合项目
 - 2.0 原作者：维茨C (ckcz123)，3.0 由马Boy 升级适配
 - 包名：`com.capubbs`，minSdk 21，targetSdk 33，versionName 3.0
 - 签名密钥：`my-release-key`，配置在 `keystore.properties`
+- GitHub 仓库：`xiaomage2006/CAPUBBS-Android-3.0`
 
 ## 构建环境
 - JDK: `D:\Android\Android Studio\jbr` (JDK 21)
 - SDK: `D:\Android\SDK`
+- Kotlin: 1.9.22
 - Gradle wrapper jar 需通过 `java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain` 运行（gradlew 脚本有 PATH 问题）
 - 编译命令：`export JAVA_HOME="/d/Android/Android Studio/jbr" && java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleDebug --no-daemon`
 
@@ -19,10 +21,16 @@
 - `lib/view/`：自定义视图
 - `lib/webconnection/`：网络层（WebConnection 基于 OkHttp）
 - `lib/subactivity/`：子页面（图片查看、GIF、WebView）
+- `update/`：检查新版本模块（Kotlin + Retrofit + Coroutines）
+
+## 依赖
+- kotlinx-coroutines-android 1.7.3
+- retrofit 2.9.0 + converter-gson 2.9.0
+- gson 2.10.1
+- okhttp 4.12.0
 
 ## 已知问题（待整理）
 - Util.java 630行过大，需拆分
 - ViewActivity.java 451行职责过重
-- ListView 适配器未使用 ViewHolder（性能问题）
+- ListView 适配器未使用 ViewHolder（性能问题）（TopFragment/ViewThread 已补）
 - WebConnection 信任所有 SSL 证书（安全风险）
-- Constants.github_repo 仍指向 2.0 仓库

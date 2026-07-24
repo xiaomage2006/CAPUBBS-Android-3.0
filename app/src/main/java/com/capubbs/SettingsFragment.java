@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,16 +19,12 @@ import com.capubbs.lib.MyFile;
 import com.capubbs.lib.Share;
 import com.capubbs.lib.Util;
 import com.capubbs.lib.ViewSetting;
-import com.capubbs.lib.json.JSONArray;
-import com.capubbs.lib.json.JSONObject;
 import com.capubbs.lib.subactivity.SubActivity;
 import com.capubbs.lib.view.BadgeView;
 import com.capubbs.lib.view.CustomToast;
-import com.capubbs.lib.webconnection.Parameters;
-import com.capubbs.lib.webconnection.WebConnection;
+import com.capubbs.update.UpdateChecker;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class SettingsFragment extends Fragment {
     static View settingsView;
@@ -99,7 +94,7 @@ public class SettingsFragment extends Fragment {
         });
         ViewSetting.setOnClickListener(settingsView, R.id.settings_source, v-> {
             String html = "<html><meta charset='utf8'><script>window." +
-                    "setTimeout(\"location.href='https://github.com/ckcz123/CAPUBBS-Android-2.0'\", 3000);</script>" +
+                    "setTimeout(\"location.href='https://github.com/" + Constants.github_repo + "'\", 3000);</script>" +
                     context.getResources().getString(R.string.settings_source_hint)+"</html>";
             Intent intent=new Intent(context, SubActivity.class);
             intent.putExtra("type",Constants.SUBACTIVITY_TYPE_WEBVIEW_HTML);
@@ -110,6 +105,7 @@ public class SettingsFragment extends Fragment {
         ViewSetting.setOnClickListener(settingsView, R.id.settings_share, v -> Share.readyToShareURL(context,
                 "分享CAPUBBS", Constants.updateURL, "欢迎使用CAPUBBS Android "+Constants.updateVersion,
                 "新版Android CAPUBBS，欢迎下载使用~", null));
+        // 若已有新版本信息（由 checkUpdate 异步设置），立即显示红点徽标
         if (!"".equals(Constants.updateVersion) && Util.compareVersions(Constants.version, Constants.updateVersion) < 0) {
             ViewSetting.setTextView(settingsView, R.id.settings_update, "有新版本       ");
             BadgeView.show(context, settingsView.findViewById(R.id.settings_update), "new");
@@ -166,94 +162,28 @@ public class SettingsFragment extends Fragment {
         catch (Exception e) {Log.e("SettingsFragment", "clearcache error", e);}
     }
 
+    /**
+     * 检查新版本（Kotlin UpdateChecker 实现）。
+     * 优先 BBS API，兜底 GitHub Release API。
+     * 发现新版本时在底部设置 Tab 和设置页同时显示红点 "new" 徽标。
+     */
     public static void checkUpdate(BBSActivity bbsActivity) {
-        new Thread(() -> {
-            // 1. 先查 BBS API
-            Parameters parameters = WebConnection.connect(Constants.bbs_url + "?ask=main", new ArrayList<>());
-            if ("200".equals(parameters.name) && parameters.value != null && !parameters.value.isEmpty()) {
-                bbsActivity.handler.sendMessage(Message.obtain(bbsActivity.handler, Constants.MESSAGE_BBS_CHECK_UPDATE, parameters.value));
-                // 如果 BBS API 返回了更新信息，不再查 GitHub
-                if (hasUpdateInfo(parameters.value)) return;
+        UpdateChecker.checkForUpdate(info -> {
+            if (info == null) return;
+
+            // 写入 Constants 供 setOthers() / 点击下载使用
+            Constants.updateVersion = info.getVersion();
+            Constants.updateURL = info.getDownloadUrl();
+            Constants.updateMsg = info.getReleaseNotes();
+
+            // 底部 Tab 红点
+            BadgeView.show(bbsActivity, bbsActivity.findViewById(R.id.bbs_bottom_img_settings), "new");
+            // 设置页红点（若 Fragment 已创建）
+            if (settingsView != null) {
+                ViewSetting.setTextView(settingsView, R.id.settings_update, "有新版本       ");
+                BadgeView.show(bbsActivity, settingsView.findViewById(R.id.settings_update), "new");
             }
-            // 2. BBS API 无更新信息，查 GitHub Releases
-            checkGithubReleases(bbsActivity);
-        }).start();
-    }
-
-    /** 检查 BBS API 响应中是否包含更新信息 */
-    private static boolean hasUpdateInfo(String response) {
-        try {
-            JSONArray arr = new JSONArray(response);
-            if (arr.length() == 0) return false;
-            JSONObject obj = arr.getJSONObject(0);
-            String ver = obj.optString("updatetime");
-            return ver != null && !ver.isEmpty();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /** 从 GitHub Releases API 检查最新版本 */
-    private static void checkGithubReleases(BBSActivity bbsActivity) {
-        try {
-            Parameters result = WebConnection.connect(Constants.github_release_api, new ArrayList<>());
-            if ("200".equals(result.name) && result.value != null) {
-                JSONObject release = new JSONObject(result.value);
-                String tagName = release.optString("tag_name");
-                String releaseUrl = release.optString("html_url");
-                String releaseNotes = release.optString("body");
-                String apkUrl = "";
-
-                // 从 assets 中找 APK 下载链接
-                JSONArray assets = release.optJSONArray("assets");
-                if (assets != null) {
-                    for (int i = 0; i < assets.length(); i++) {
-                        JSONObject asset = assets.getJSONObject(i);
-                        String name = asset.optString("name", "");
-                        if (name.endsWith(".apk")) {
-                            apkUrl = asset.optString("browser_download_url");
-                            break;
-                        }
-                    }
-                }
-
-                // 如果没有 APK 资源，使用 Release 页面 URL
-                if (apkUrl.isEmpty()) apkUrl = releaseUrl;
-
-                Constants.updateVersion = tagName;
-                Constants.updateURL = apkUrl;
-                Constants.updateMsg = releaseNotes != null && !releaseNotes.isEmpty()
-                        ? releaseNotes : "发现新版本，点击下载更新";
-
-                bbsActivity.handler.sendMessage(Message.obtain(
-                        bbsActivity.handler, Constants.MESSAGE_BBS_CHECK_UPDATE, "github"));
-            }
-        } catch (Exception e) {
-            Log.e("SettingsFragment", "github release check error", e);
-        }
-    }
-
-    public static void update(BBSActivity bbsActivity, String string) {
-        try {
-            // "github" 标记表示数据已由 checkGithubReleases 直接设置
-            if (!"github".equals(string)) {
-                // BBS API 响应：JSON 数组格式
-                JSONObject jsonObject = new JSONArray(string).getJSONObject(0);
-                Constants.updateVersion = jsonObject.optString("updatetime");
-                Constants.updateURL = jsonObject.optString("updateurl");
-                Constants.updateMsg = jsonObject.optString("updatetext");
-            }
-
-            if (!"".equals(Constants.updateVersion)
-                    && Util.compareVersions(Constants.version, Constants.updateVersion) < 0) {
-                BadgeView.show(bbsActivity, bbsActivity.findViewById(R.id.bbs_bottom_img_settings), "new");
-                if (settingsView != null) {
-                    ViewSetting.setTextView(settingsView, R.id.settings_update, "有新版本       ");
-                    BadgeView.show(bbsActivity, settingsView.findViewById(R.id.settings_update), "new");
-                }
-            }
-        }
-        catch (Exception e) {Log.e("SettingsFragment", "update error", e);}
+        });
     }
 
 }

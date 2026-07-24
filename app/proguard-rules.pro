@@ -12,6 +12,14 @@
 # === Retrofit (如未来引入) ===
 -dontwarn retrofit2.**
 -keep class retrofit2.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+
+# === Gson ===
+-dontwarn com.google.gson.**
+-keep class com.google.gson.** { *; }
+# 保留数据类字段名（Gson 反射用）
+-keep class com.capubbs.update.** { *; }
 
 # === AppCompat / AndroidX ===
 -keep class androidx.appcompat.** { *; }

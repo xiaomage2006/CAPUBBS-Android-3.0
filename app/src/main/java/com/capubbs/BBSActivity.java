@@ -29,9 +29,6 @@ public class BBSActivity extends BaseActivity {
         if (msg.what == Constants.MESSAGE_BBS_LOGIN) {
             Userinfo.finishLogin(this, (String) msg.obj);
         }
-        if (msg.what == Constants.MESSAGE_BBS_CHECK_UPDATE) {
-            SettingsFragment.update(this, (String)msg.obj);
-        }
         return false;
     });
 

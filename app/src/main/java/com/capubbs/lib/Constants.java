@@ -72,7 +72,7 @@ public class Constants {
     public static String updateVersion=Constants.version, updateMsg="", updateURL="";
 
     /** GitHub 仓库地址和 Releases API */
-    public static final String github_repo = "ckcz123/CAPUBBS-Android-2.0";
+    public static final String github_repo = "xiaomage2006/CAPUBBS-Android-3.0";
     public static final String github_release_api = "https://api.github.com/repos/" + github_repo + "/releases/latest";
     public static final String github_release_page = "https://github.com/" + github_repo + "/releases";
 
