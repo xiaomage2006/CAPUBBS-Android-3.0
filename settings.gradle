@@ -13,5 +13,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "CAPUBBS-Android-2.0"
+rootProject.name = "CAPUBBS-Android-3.0"
 include ':app'

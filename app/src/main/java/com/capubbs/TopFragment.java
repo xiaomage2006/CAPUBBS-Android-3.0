@@ -184,7 +184,12 @@ public class TopFragment extends Fragment {
                 }
 
                 holder.title.setText(threadInfo.title);
-                holder.author.setText(threadInfo.replyer);
+                // 当帖子只有一层楼时，replyer 为空，回退显示楼主本人
+                String replyer = threadInfo.replyer;
+                if (replyer == null || replyer.trim().isEmpty()) {
+                    replyer = threadInfo.author;
+                }
+                holder.author.setText(replyer);
                 holder.time.setText(MyCalendar.format(threadInfo.time));
                 return convertView;
             }
